@@ -102,7 +102,7 @@ A continuación, se presentan recetas verificadas y documentadas, diseñadas par
         masterclasslinux/create_vm.sh
         19:ADMIN_PASSWORD="Password1243!"
         Scripts_uPlanner/bitbucket_scripts_u-planner/probar_conexion.py
-        8:BITBUCKET_APP_PASSWORD = "ATBB88jMHfPVerL2GSETE4jUpYuH2014B22B"
+        8:BITBUCKET_APP_PASSWORD = "ATBB88jMHfPVerL2GSETE4jkiuolkjuyghtrdfgbvs"
         ```
 > **🚨 ADVERTENCIA DE SEGURIDAD CRÍTICA 🚨**
 > Si este comando encuentra algún resultado, debes tratarlo como una **brecha de seguridad activa**.
