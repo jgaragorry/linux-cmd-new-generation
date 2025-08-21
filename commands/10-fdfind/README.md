@@ -33,22 +33,6 @@ Entender la sintaxis de `fdfind` es crucial para usarlo correctamente. Su estruc
 
 > **La Regla de Oro del Punto (`.`):** Si no quieres buscar por un nombre específico (PATRÓN), sino filtrar todos los archivos de una RUTA según ciertas OPCIONES (como tamaño, fecha o extensión), debes usar un punto `.` como PATRÓN comodín.
 
-### ¿Quién puede ejecutarlo?
-
-Cualquier usuario del sistema. Para buscar en directorios protegidos como `/etc` o `/var`, necesitarás usar `sudo`.
-
-### Argumentos y Opciones Clave
-
-| Opción | Alias | Descripción |
-| :--- | :--- | :--- |
-| `--type` | `-t` | Busca por tipo: `f` (fichero), `d` (directorio), `l` (enlace simbólico). |
-| `--extension` | `-e` | Busca por extensión de archivo (sin el punto). |
-| `--exec` | `-x` | Ejecuta un comando por cada resultado encontrado. |
-| `--exec-batch` | `-X` | Ejecuta un comando una sola vez, pasándole todos los resultados. |
-| `--changed-within` | | Busca archivos modificados **dentro** del marco de tiempo (ej: `2d`). |
-| `--changed-before` | | Busca archivos modificados **antes** del marco de tiempo (ej: `90d`). |
-| `--print0` | `-0` | Separa los resultados con un carácter nulo, para pipelines robustos. |
-
 ### Configuración de Alias Permanente (Bash)
 
 Para usar `fdfind` de forma transparente, es casi obligatorio crear un alias.
@@ -58,81 +42,120 @@ alias fd='fdfind'
 ```
 *Nuestro script `configure_aliases.sh` ya configura `alias find='fdfind'`.*
 
-### 🎓 Ejercicios Prácticos: Una Guía Completa y Verificada
+### 🎓 Guía Práctica: De Tareas Básicas a Recetas Profesionales
 
-Estos ejercicios están probados en Ubuntu 24.04 y están organizados por complejidad para resolver tareas del mundo real, incorporando todo lo que hemos aprendido.
+Esta guía contiene todos los comandos que hemos probado y verificado. Está organizada de forma progresiva para que domines `fdfind` desde cero.
 
 ---
+
+### Parte 1: Fundamentos Esenciales
 
 #### Ejercicio 1: Búsqueda por Extensión (El Pan de Cada Día)
 
 **Objetivo:** Encontrar todos los scripts de Python (`.py`) en el directorio actual.
-
 **Comando:**
 ```bash
 fdfind --extension py .
 ```
-* **¿Qué hace?** Busca (`fdfind`) archivos que terminen con la extensión `py` (`--extension py`) en el directorio actual (`.`). El primer `.` que ves aquí es la **RUTA**. Como no especificamos un PATRÓN antes de la ruta, `fdfind` asume un patrón comodín, buscando cualquier nombre de archivo.
-* **¿Por qué usarlo?** Es la tarea de búsqueda más común. Rápida, simple y mucho más legible que `find . -name "*.py"`.
-* **Resultado Esperado:** Una lista de todos los archivos que terminan en `.py` en tu ubicación actual y subdirectorios.
+* **Análisis:** Busca (`fdfind`) archivos con la extensión `py` (`--extension py`) en el directorio actual (`.`). Esta es la forma más común y directa de usar la herramienta para encontrar tipos de archivo específicos.
 
----
-
-#### Ejercicio 2: Encontrar y Actuar (Ejecución de Comandos)
+#### Ejercicio 2: Encontrar y Actuar sobre Archivos (Ejecución de Comandos)
 
 **Objetivo:** Tienes un directorio con scripts (`.sh`) y quieres asegurarte de que todos tengan permisos de ejecución.
-
 **Comando:**
 ```bash
 fdfind . --extension sh --exec-batch chmod +x
 ```
-* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `sh` (`--extension sh`) y ejecuta una sola vez (`--exec-batch`) el comando `chmod +x`, pasándole como argumentos todos los scripts encontrados.
-* **¿Por qué usarlo?** Es una forma masiva y eficiente de modificar archivos. `--exec-batch` es superior a `--exec` cuando el comando puede aceptar múltiples archivos a la vez (como `chmod` o `rm`), ya que es mucho más rápido.
-* **Resultado Esperado:** El comando no producirá ninguna salida si tiene éxito, pero todos tus archivos `.sh` ahora tendrán permisos de ejecución.
-
----
+* **Análisis:** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `sh` (`--extension sh`) y ejecuta una sola vez (`--exec-batch`) el comando `chmod +x`, pasándole como argumentos todos los scripts encontrados. Es una forma masiva y eficiente de modificar archivos.
 
 #### Ejercicio 3: Búsqueda por Antigüedad (Auditoría de Cambios)
 
 **Objetivo:** Como SysAdmin, quieres auditar qué archivos de configuración en `/etc` se han modificado en los últimos 2 días.
-
 **Comando:**
 ```bash
 sudo fdfind . --extension conf --changed-within 2d /etc
 ```
-* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `.conf` (`--extension conf`) que haya cambiado en los últimos 2 días (`--changed-within 2d`), dentro del directorio `/etc`. Usamos `sudo` para poder leer este directorio protegido.
-* **¿Por qué usarlo?** Es la forma más rápida y limpia de auditar cambios recientes en configuraciones críticas, ya sea por mantenimiento, actualizaciones o por motivos de seguridad.
-* **Resultado Esperado:** Una lista de los archivos `.conf` modificados recientemente. Si no hay salida, significa que la búsqueda fue exitosa y ningún archivo cumplió los criterios.
+* **Análisis:** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `.conf` que haya cambiado en los últimos 2 días (`--changed-within 2d`), dentro de `/etc`. Es la forma más rápida de auditar cambios recientes en configuraciones críticas. Si no hay salida, significa que ningún archivo cumplió los criterios.
 
 ---
 
-#### Ejercicio 4: Búsqueda por Tipo de Archivo (Mantenimiento del Sistema)
+### Parte 2: Pipelines y Mantenimiento del Sistema
 
-**Objetivo:** Encontrar todos los enlaces simbólicos rotos en tu directorio personal (`~`), que pueden causar errores en scripts.
+#### Ejercicio 4: Búsqueda por Tipo y Verificación de Enlaces Rotos
+
+**Objetivo:** Encontrar y verificar todos los enlaces simbólicos rotos en tu directorio personal (`~`).
+**Procedimiento Completo (Prueba y Ejecución):**
+
+1.  **Paso de Prueba (Opcional pero recomendado):** Para ver el comando en acción, primero crearemos un enlace roto a propósito.
+    ```bash
+    # Este comando crea un enlace a un archivo que no existe
+    ln -s archivo_que_no_existe.txt enlace_roto
+    ```
+
+2.  **Ejecución del Comando de Búsqueda:**
+    ```bash
+    fdfind . -t l ~ --exec-batch file | grep "broken symbolic link"
+    ```
+    * **Análisis:** Busca (`fdfind`) cualquier cosa (`.`) que sea un enlace simbólico (`-t l`) en tu home (`~`). Luego, pasa todos los resultados (`--exec-batch`) a la utilidad `file`, y `grep` filtra la salida para mostrar solo los enlaces rotos.
+
+3.  **Limpieza del Archivo de Prueba:**
+    ```bash
+    rm enlace_roto
+    ```
+* **Utilidad:** Esta es una tarea de mantenimiento proactiva. Limpiar enlaces rotos previene errores inesperados en scripts y aplicaciones.
+
+---
+
+### Parte 3: Recetas Profesionales para SysAdmin, DevOps y SecOps
+
+Estas recetas resuelven problemas complejos del mundo real, utilizando pipelines robustos y las herramientas adecuadas para cada trabajo.
+
+#### Receta 1: El Detective de Logs (SysOps / DevOps / SecOps)
+
+**Objetivo:** Durante un incidente, encontrar todas las menciones de un ID de error (`TRX-5A8E2C`) en cualquier archivo de log modificado en `/var/log` en las últimas 6 horas, mostrando el contexto.
 
 **Comando:**
 ```bash
-fdfind . -t l ~ --exec-batch file | grep "broken symbolic link"
+sudo fdfind . -0 --type f --changed-within 6h /var/log | xargs -0 sudo rg --with-filename --context 10 'TRX-5A8E2C'
 ```
-* **¿Qué hace?** Busca (`fdfind`) cualquier cosa (`.`) que sea un enlace simbólico (`-t l`) en tu home (`~`). Luego, pasa todos los resultados de una vez (`--exec-batch`) a la utilidad `file`, que los analiza. Finalmente, `grep` filtra la salida de `file` para mostrar solo los enlaces que están rotos.
-* **¿Por qué usarlo?** Es una tarea de mantenimiento proactiva. Limpiar enlaces rotos previene errores inesperados.
-* **Resultado Esperado:** Una lista de los enlaces rotos y a dónde apuntaban. Si no hay salida, significa que no se encontraron enlaces rotos.
+* **Análisis:**
+    1. `sudo fdfind ... -0`: Como `root`, encuentra todos los archivos modificados recientemente en `/var/log` y los pasa de forma segura (con delimitador nulo `-0`).
+    2. `| xargs -0 sudo rg ...`: `xargs` recibe la lista segura (`-0`) y ejecuta `ripgrep` (`rg`) también con `sudo` (clave para evitar errores de permisos). `rg` busca el ID, mostrando el nombre del archivo y 10 líneas de contexto.
+* **Lección Clave:** Los privilegios de `sudo` no se heredan a través de las tuberías (`|`). Cada comando que necesite acceso elevado debe tener su propio `sudo`.
 
----
+#### Receta 2: Auditor de Seguridad Automatizado (SecOps / SysAdmin)
 
-#### Ejercicio 5: La Receta Profesional (Búsqueda Robusta a Prueba de Fallos)
+**Objetivo:** Auditar todos los archivos de configuración de SSH para encontrar si alguno permite el inicio de sesión de `root` y revisar los archivos sospechosos.
 
-**Objetivo:** Quieres encontrar todos los archivos ejecutables en tu directorio actual, de una manera que **nunca falle**, incluso si los nombres de archivo contienen espacios, saltos de línea o caracteres extraños.
-
-**El Desafío:** Un pipeline simple como `fdfind ... | xargs stat` puede romperse si un archivo se llama `"Mi script con espacios.sh"`.
-
-**La Solución Robusta:**
+**Script Completo:**
 ```bash
-fdfind . -0 --type f . | xargs -0 stat -c "%a %n" | grep "^7"
+# Paso 1: Usamos un glob (-g) para ser más específicos y robustos
+archivos_peligrosos=$(sudo rg --glob 'sshd_config' --glob 'sshd_config.d/*.conf' -l '^\s*PermitRootLogin\s+yes' /etc/ssh/)
+
+# Paso 2: La lógica para revisar y mostrar los hallazgos
+if [[ -n "$archivos_peligrosos" ]]; then
+    echo "🚨 ¡ADVERTENCIA! Se encontraron archivos con PermitRootLogin activado:"
+    echo "$archivos_peligrosos"
+    echo "--- Mostrando contenido con resaltado: ---"
+    echo "$archivos_peligrosos" | xargs -d '\n' sudo bat
+else
+    echo "✅ ¡Excelente! No se encontraron configuraciones de SSH inseguras."
+fi
 ```
-* **¿Qué hace?** Este pipeline es una obra de arte de la robustez:
-    1.  `fdfind . -0 --type f .`: Busca cualquier (`.`) archivo (`-t f`) en el directorio actual (`.`) y separa los resultados con un carácter nulo invisible (`-0` o `--print0`).
-    2.  `| xargs -0 stat ...`: `xargs -0` está diseñado específicamente para leer la lista separada por nulos, por lo que nunca se confundirá con los espacios o caracteres especiales en los nombres. Luego, ejecuta `stat` en cada archivo para obtener sus permisos numéricos (`%a`) y su nombre (`%n`).
-    3.  `| grep "^7"`: Finalmente, `grep` filtra la lista para mostrar solo los archivos cuyos permisos empiezan por `7` (permiso de ejecución para el dueño).
-* **¿Por qué usarlo?** Esta es la forma profesional de construir scripts y comandos en Linux. Garantiza que tu lógica funcione de manera predecible y segura, sin importar cuán extraños sean los nombres de los archivos.
-* **Resultado Esperado:** Una lista limpia de dos columnas: los permisos numéricos y el nombre del archivo de todos los ficheros ejecutables en la ubicación.
+* **Análisis:** Este script primero usa `ripgrep` con patrones `glob` (`-g`) para buscar de forma fiable la directiva insegura. Si encuentra archivos, los guarda en una variable y luego usa `bat` para mostrártelos de forma legible. Si no, te da una confirmación de que todo está bien.
+* **Utilidad:** Automatiza una auditoría de seguridad crítica, identificando y presentándote los puntos de riesgo para una acción inmediata.
+
+#### Receta 3: Forense de Espacio en Disco (SysAdmin / SysOps)
+
+**Objetivo:** Encontrar los 10 archivos más grandes (multimedia, comprimidos) en tu directorio personal (`~`) para liberar espacio.
+
+**Comando:**
+```bash
+fdfind . -0 --type f -e mov -e mp4 -e zip -e gz -e rar ~ | xargs -0 du -h | sort -rh | head -n 10
+```
+* **Análisis:**
+    1.  `fdfind ... ~`: Busca en tu home (`~`) todos los archivos con las extensiones especificadas.
+    2.  `| xargs -0 du -h`: Calcula el tamaño de cada archivo de forma segura.
+    3.  `| sort -rh`: Ordena los resultados numéricamente de mayor a menor (la opción `-h` es crucial para que entienda `G` > `M` > `K`).
+    4.  `| head -n 10`: Muestra solo el top 10.
+* **Utilidad:** Es una herramienta quirúrgica para la gestión de disco. Obtienes un reporte limpio, ordenado y priorizado para tomar decisiones informadas sobre qué borrar.
