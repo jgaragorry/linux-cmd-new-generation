@@ -25,10 +25,10 @@ sudo apt install -y gpg wget
 sudo mkdir -p /etc/apt/keyrings
 
 # 3. Descargar y añadir la llave GPG del repositorio
-wget -qO- [https://raw.githubusercontent.com/eza-community/eza/main/deb.asc](https://raw.githubusercontent.com/eza-community/eza/main/deb.asc) | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
 
 # 4. Añadir el repositorio a las fuentes de APT
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] [http://deb.gierens.de](http://deb.gierens.de) stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 
 # 5. Dar permisos adecuados a los archivos
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
