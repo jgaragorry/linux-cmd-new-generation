@@ -23,7 +23,7 @@ sudo apt install -y fd-find
 
 ### La Sintaxis Correcta: La Clave del Éxito
 
-Tras nuestra experiencia, hemos aprendido que entender la sintaxis de `fdfind` es crucial. Su estructura es estricta y lógica:
+Entender la sintaxis de `fdfind` es crucial para usarlo correctamente. Su estructura es estricta y lógica:
 
 `fdfind [OPCIONES] <PATRÓN> [RUTA]`
 
@@ -31,7 +31,7 @@ Tras nuestra experiencia, hemos aprendido que entender la sintaxis de `fdfind` e
 2.  **PATRÓN:** El **nombre** o expresión regular que buscas. **Este campo es obligatorio.**
 3.  **RUTA:** El directorio donde quieres buscar. Si se omite, busca en el directorio actual.
 
-> **La Regla de Oro del Punto (`.`):** Si no quieres buscar por un nombre específico (PATRÓN), sino filtrar todos los archivos de una RUTA según ciertas OPCIONES (como tamaño, fecha o extensión), debes usar un punto `.` como PATRÓN comodín. Este fue el aprendizaje clave de nuestros ejercicios.
+> **La Regla de Oro del Punto (`.`):** Si no quieres buscar por un nombre específico (PATRÓN), sino filtrar todos los archivos de una RUTA según ciertas OPCIONES (como tamaño, fecha o extensión), debes usar un punto `.` como PATRÓN comodín.
 
 ### ¿Quién puede ejecutarlo?
 
@@ -58,13 +58,41 @@ alias fd='fdfind'
 ```
 *Nuestro script `configure_aliases.sh` ya configura `alias find='fdfind'`.*
 
-### 🎓 Ejercicios Prácticos: De Básico a Profesional
+### 🎓 Ejercicios Prácticos: Una Guía Completa y Verificada
 
-Estos ejercicios están verificados en Ubuntu 24.04 y están diseñados para resolver tareas reales, incorporando todo lo que hemos aprendido.
+Estos ejercicios están probados en Ubuntu 24.04 y están organizados por complejidad para resolver tareas del mundo real, incorporando todo lo que hemos aprendido.
 
 ---
 
-#### Ejercicio 1: Búsqueda por Antigüedad (Auditoría de Cambios)
+#### Ejercicio 1: Búsqueda por Extensión (El Pan de Cada Día)
+
+**Objetivo:** Encontrar todos los scripts de Python (`.py`) en el directorio actual.
+
+**Comando:**
+```bash
+fdfind --extension py .
+```
+* **¿Qué hace?** Busca (`fdfind`) archivos que terminen con la extensión `py` (`--extension py`) en el directorio actual (`.`). El primer `.` que ves aquí es la **RUTA**. Como no especificamos un PATRÓN antes de la ruta, `fdfind` asume un patrón comodín, buscando cualquier nombre de archivo.
+* **¿Por qué usarlo?** Es la tarea de búsqueda más común. Rápida, simple y mucho más legible que `find . -name "*.py"`.
+* **Resultado Esperado:** Una lista de todos los archivos que terminan en `.py` en tu ubicación actual y subdirectorios.
+
+---
+
+#### Ejercicio 2: Encontrar y Actuar (Ejecución de Comandos)
+
+**Objetivo:** Tienes un directorio con scripts (`.sh`) y quieres asegurarte de que todos tengan permisos de ejecución.
+
+**Comando:**
+```bash
+fdfind . --extension sh --exec-batch chmod +x
+```
+* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `sh` (`--extension sh`) y ejecuta una sola vez (`--exec-batch`) el comando `chmod +x`, pasándole como argumentos todos los scripts encontrados.
+* **¿Por qué usarlo?** Es una forma masiva y eficiente de modificar archivos. `--exec-batch` es superior a `--exec` cuando el comando puede aceptar múltiples archivos a la vez (como `chmod` o `rm`), ya que es mucho más rápido.
+* **Resultado Esperado:** El comando no producirá ninguna salida si tiene éxito, pero todos tus archivos `.sh` ahora tendrán permisos de ejecución.
+
+---
+
+#### Ejercicio 3: Búsqueda por Antigüedad (Auditoría de Cambios)
 
 **Objetivo:** Como SysAdmin, quieres auditar qué archivos de configuración en `/etc` se han modificado en los últimos 2 días.
 
@@ -72,13 +100,13 @@ Estos ejercicios están verificados en Ubuntu 24.04 y están diseñados para res
 ```bash
 sudo fdfind . --extension conf --changed-within 2d /etc
 ```
-* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `.conf` (`--extension conf`) que haya cambiado en los últimos 2 días (`--changed-within 2d`), dentro del directorio `/etc`.
+* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `.conf` (`--extension conf`) que haya cambiado en los últimos 2 días (`--changed-within 2d`), dentro del directorio `/etc`. Usamos `sudo` para poder leer este directorio protegido.
 * **¿Por qué usarlo?** Es la forma más rápida y limpia de auditar cambios recientes en configuraciones críticas, ya sea por mantenimiento, actualizaciones o por motivos de seguridad.
 * **Resultado Esperado:** Una lista de los archivos `.conf` modificados recientemente. Si no hay salida, significa que la búsqueda fue exitosa y ningún archivo cumplió los criterios.
 
 ---
 
-#### Ejercicio 2: Búsqueda por Tipo y Ejecución de Comandos (Mantenimiento)
+#### Ejercicio 4: Búsqueda por Tipo de Archivo (Mantenimiento del Sistema)
 
 **Objetivo:** Encontrar todos los enlaces simbólicos rotos en tu directorio personal (`~`), que pueden causar errores en scripts.
 
@@ -87,30 +115,14 @@ sudo fdfind . --extension conf --changed-within 2d /etc
 fdfind . -t l ~ --exec-batch file | grep "broken symbolic link"
 ```
 * **¿Qué hace?** Busca (`fdfind`) cualquier cosa (`.`) que sea un enlace simbólico (`-t l`) en tu home (`~`). Luego, pasa todos los resultados de una vez (`--exec-batch`) a la utilidad `file`, que los analiza. Finalmente, `grep` filtra la salida de `file` para mostrar solo los enlaces que están rotos.
-* **¿Por qué usarlo?** Es una tarea de mantenimiento proactiva. Limpiar enlaces rotos previene errores inesperados. La opción `--exec-batch` es mucho más eficiente que `--exec` si tienes miles de archivos.
-* **Resultado Esperado:** Una lista de los enlaces rotos y a dónde apuntaban. Si no hay salida, significa que tu sistema está limpio de enlaces simbólicos rotos en esa ubicación.
-
-> **Pro-Tip:** Para verificar este comando, puedes crear un enlace roto de prueba con `ln -s archivo_inexistente enlace_roto`, ejecutar la búsqueda para verlo, y luego limpiarlo con `rm enlace_roto`.
+* **¿Por qué usarlo?** Es una tarea de mantenimiento proactiva. Limpiar enlaces rotos previene errores inesperados.
+* **Resultado Esperado:** Una lista de los enlaces rotos y a dónde apuntaban. Si no hay salida, significa que no se encontraron enlaces rotos.
 
 ---
 
-#### Ejercicio 3: Ejecutando Comandos de Forma Segura (Inspección Previa)
+#### Ejercicio 5: La Receta Profesional (Búsqueda Robusta a Prueba de Fallos)
 
-**Objetivo:** Antes de borrar viejos backups de logs (`.gz`) en `/var/log`, quieres inspeccionar sus detalles (tamaño, fecha) para estar seguro.
-
-**Comando:**
-```bash
-sudo fdfind . --extension gz --changed-before 90d /var/log --exec ls -lh
-```
-* **¿Qué hace?** Busca (`fdfind`) cualquier archivo (`.`) con la extensión `.gz` que sea más antiguo de 90 días (`--changed-before 90d`) en `/var/log`. Por cada archivo encontrado, ejecuta (`--exec`) el comando `ls -lh` para mostrar sus detalles en un formato legible.
-* **¿Por qué usarlo?** Es el principio de "medir dos veces, cortar una". En lugar de un destructivo `--exec rm`, usamos un inofensivo `--exec ls -lh` para inspeccionar. Es una práctica fundamental para cualquier administrador de sistemas para evitar errores costosos.
-* **Resultado Esperado:** Una lista detallada (permisos, dueño, tamaño, fecha) de cada archivo de log comprimido que sea más antiguo de 90 días.
-
----
-
-#### Ejercicio 4: La Receta Profesional (Búsqueda Robusta a Prueba de Fallos)
-
-**Objetivo:** Quieres encontrar todos los archivos ejecutables en tu directorio actual, pero de una manera que **nunca falle**, incluso si los nombres de archivo contienen espacios, saltos de línea o caracteres extraños.
+**Objetivo:** Quieres encontrar todos los archivos ejecutables en tu directorio actual, de una manera que **nunca falle**, incluso si los nombres de archivo contienen espacios, saltos de línea o caracteres extraños.
 
 **El Desafío:** Un pipeline simple como `fdfind ... | xargs stat` puede romperse si un archivo se llama `"Mi script con espacios.sh"`.
 
