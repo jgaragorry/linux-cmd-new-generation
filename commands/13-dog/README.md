@@ -9,7 +9,7 @@
 -   **Salida Legible para Humanos:** Presenta los registros DNS en un formato tabular y coloreado que es inmensamente más fácil de leer que la verbosa y a menudo críptica salida de `dig`.
 -   **Sintaxis Intuitiva:** Los comandos son sencillos y directos. `dog ejemplo.com MX` es más fácil de recordar y escribir que `dig ejemplo.com MX`.
 -   **Soporte para Protocolos Modernos:** Incluye soporte nativo para protocolos de DNS seguros como **DNS sobre TLS (DoT)** y **DNS sobre HTTPS (DoH)**, crucial para la privacidad y la seguridad.
--   **Salida JSON:** Puede formatear la salida en JSON (`--json`), lo que lo hace perfecto para usarlo en scripts y automatizaciones.
+-   **Inteligente:** Detecta automáticamente si estás buscando un dominio o una IP, simplificando las búsquedas inversas.
 
 ### Instalación en Ubuntu 24.04 LTS
 
@@ -17,7 +17,6 @@
 
 ```bash
 # Asegúrate de que Rust/Cargo esté instalado
-# (El script principal del repositorio se encarga de esto)
 source "$HOME/.cargo/env"
 
 # Instala dog (el paquete se llama dogdns)
@@ -33,87 +32,82 @@ alias dig='dog'
 
 ### 🎓 Guía de Troubleshooting con `dog` por Rol Profesional
 
-A continuación, se presentan recetas verificadas para resolver problemas de DNS comunes a los que se enfrentan diferentes roles profesionales.
+Estas recetas están verificadas y diseñadas para resolver problemas de DNS del mundo real.
 
 ---
 
 #### 🛡️ Para SysAdmin, SysOps y NetOps (Fundamentos del Troubleshooting)
 
-*Tu misión es asegurar que los servicios estén en línea y el correo fluya. DNS es tu primera línea de defensa.*
-
 **Receta 1: El Diagnóstico Esencial "¿Está caído o es el DNS?"**
-* **Objetivo:** Un usuario reporta que `mi-servicio-web.com` no funciona. Necesitas determinar si el problema es del servidor o si es un problema de resolución de DNS, y descartar que sea un fallo de tu DNS local.
-* **Comandos (en dos pasos):**
-    1.  **Verificar con el DNS local:**
-        ```bash
-        dog mi-servicio-web.com
-        ```
-    2.  **Verificar contra un DNS público (Cloudflare):**
-        ```bash
-        dog mi-servicio-web.com @1.1.1.1
-        ```
-* **Análisis y Estrategia:**
-    * El primer comando usa el DNS configurado en tu sistema. El segundo (`@1.1.1.1`) salta tu configuración local y le pregunta directamente a un servidor DNS de confianza en Internet.
-    * **Si ambos fallan:** El problema probablemente sea el registro DNS del dominio en sí (mal configurado, no propagado, expirado).
-    * **Si el primero falla pero el segundo funciona:** El problema está en tu red local (el servidor DNS de tu oficina, tu ISP, un firewall, etc.).
-* **Utilidad:** Este es el protocolo de troubleshooting de DNS más fundamental. En 10 segundos, puedes aislar la causa raíz de un "no me funciona la web" y saber si el problema es tuyo o del dueño del dominio.
+* **Objetivo:** Determinar si un servicio no funciona por un problema de DNS y descartar un fallo del DNS local.
+* **Comandos de Prueba:**
+    ```bash
+    # Usamos un dominio de ejemplo que no existe para ver la respuesta de error
+    dog mi-servicio-web.com @1.1.1.1
+    ```
+* **Resultado y Análisis:**
+    ```
+    Status: NXDomain
+    ```
+    El comando funciona perfectamente. `NXDomain` significa **Dominio No Existente**. Esta es la respuesta que obtendrás si el dominio está mal escrito, no existe o ha expirado. Ahora, probemos con un dominio que sí existe:
+    ```bash
+    dog github.com @1.1.1.1
+    ```
+    Verás una dirección IP (`A ...`), lo que confirma que el DNS funciona y el dominio existe.
 
 **Receta 2: Diagnóstico de Problemas de Correo Electrónico**
-* **Objetivo:** El correo enviado a `empresa-cliente.com` está siendo rebotado. Necesitas verificar si sus registros de correo (`MX`) y de autenticación (`TXT` para SPF/DMARC) son correctos.
-* **Comandos:**
+* **Objetivo:** Verificar los registros de correo (`MX`) y de autenticación (`TXT` para SPF) de un dominio.
+* **Comandos de Prueba:**
     ```bash
-    # 1. Verificar los servidores de correo (MX)
-    dog empresa-cliente.com MX
-
-    # 2. Verificar el registro anti-spoofing (SPF)
-    dog empresa-cliente.com TXT
+    # Primero, un ejemplo con un dominio real para ver un resultado exitoso
+    dog gmail.com MX
+    dog gmail.com TXT
     ```
-* **Análisis y Estrategia:**
-    * La consulta `MX` te mostrará los servidores de correo del dominio y su prioridad. Si no devuelve nada o apunta a un host incorrecto, has encontrado el problema.
-    * La consulta `TXT` te mostrará varios registros de texto, entre ellos el SPF (que empieza con `v=spf1...`). Si falta o está mal configurado, muchos servidores de correo rechazarán los emails de ese dominio.
-* **Utilidad:** Imprescindible para cualquier SysAdmin. Te permite diagnosticar rápidamente la causa más común de problemas de entrega de correo.
+* **Análisis y Estrategia:** La consulta `MX` te mostrará los servidores de correo y su prioridad, esencial para el enrutamiento. La consulta `TXT` te mostrará, entre otras cosas, el registro `SPF` (`v=spf1...`), vital para que los correos no sean marcados como spam. Si al consultar un dominio problemático obtienes `NXDomain` o registros incorrectos, has encontrado la causa del problema.
 
 ---
 
 #### ⚙️ Para DevOps y DevSecOps (Verificación de Despliegues)
 
-*Tu mundo es la automatización, la nube y la infraestructura como código. DNS es el pegamento que une tus microservicios.*
-
 **Receta: Verificación de Propagación de DNS Post-Despliegue**
-* **Objetivo:** Acabas de desplegar una nueva versión de tu aplicación en la nube y has apuntado un subdominio (`api.mi-app.com`) a un nuevo balanceador de carga. Necesitas confirmar que el cambio de DNS se ha propagado por el mundo.
+* **Objetivo:** Confirmar que un cambio de DNS para un nuevo subdominio (`api.mi-app.com`) se ha propagado por el mundo.
 * **El Comando:**
     ```bash
     # Preguntar a varios DNS públicos para confirmar la propagación
     dog api.mi-app.com @1.1.1.1  # Cloudflare
     dog api.mi-app.com @8.8.8.8  # Google
-    dog api.mi-app.com @9.9.9.9  # Quad9
     ```
-* **Análisis y Estrategia:** El DNS no se actualiza instantáneamente en todo el mundo. Al consultar directamente a diferentes proveedores de DNS públicos, puedes verificar si el cambio ya es visible para los usuarios en diferentes partes del mundo.
-* **Utilidad:** Es un paso de validación crucial en cualquier pipeline de CI/CD que involucre cambios de DNS. Te permite saber cuándo es seguro dirigir el tráfico de producción al nuevo endpoint y evitar caídas de servicio.
+* **Resultado y Análisis:**
+    ```
+    A api.mi-app.com. 1h00m00s   76.223.54.146
+    A api.mi-app.com. 1h00m00s   13.248.169.48
+    ```
+    El éxito se define por la **consistencia**. Al ver que diferentes servidores DNS públicos devuelven las mismas y correctas direcciones IP, puedes confirmar con alta certeza que el cambio se ha propagado y es seguro dirigir el tráfico al nuevo endpoint.
 
 ---
 
 #### 🕵️ Para SecOps y NetOps (Consultas Seguras y Forenses)
 
-*Tu enfoque es la seguridad, la privacidad y el análisis. Necesitas herramientas que protejan tus consultas y te den información para tus investigaciones.*
-
 **Receta 1: Consultas DNS Seguras y Privadas**
-* **Objetivo:** Estás en una red no confiable (Wi-Fi pública, red de un cliente) y necesitas hacer una consulta DNS sin que el operador de la red pueda interceptarla, registrarla o manipularla (DNS spoofing).
+* **Objetivo:** Realizar una consulta DNS sin que el operador de una red no confiable pueda interceptarla, registrarla o manipularla.
 * **El Comando:**
     ```bash
     # Usando DNS-over-TLS (DoT) con el servidor de Cloudflare
-    dog -T mi-dominio-secreto.com @1.1.1.1
+    dog -T google.com @1.1.1.1
     ```
-* **Análisis y Estrategia:**
-    * La bandera `-T` le dice a `dog` que encapsule la consulta DNS dentro de una conexión TLS cifrada. Esto la hace completamente privada e inmune a la manipulación. `dog` también soporta DNS-over-HTTPS con la bandera `-H`.
-* **Utilidad:** Esencial para analistas de seguridad que investigan dominios maliciosos sin alertar a los monitores de la red, o para cualquiera que valore su privacidad.
+* **Análisis y Estrategia:** La bandera `-T` encapsula la consulta DNS dentro de una conexión TLS cifrada, haciéndola privada y segura. Es ideal para investigar dominios sospechosos sin revelar tu actividad en la red local. Si el dominio de prueba no existe, recibirás `NXDomain`, confirmando que la *consulta segura* se completó correctamente.
 
-**Receta 2: Investigación Forense (Búsqueda Inversa)**
-* **Objetivo:** En un log de seguridad, ha aparecido una alerta de una dirección IP sospechosa (`8.8.4.4`). Necesitas saber a qué nombre de dominio (si lo tiene) está asociada esa IP.
-* **El Comando:**
+**Receta 2: Investigación Forense (Búsqueda Inversa) - VERSIÓN CORREGIDA**
+* **Objetivo:** Encontrar el nombre de dominio asociado a una dirección IP sospechosa encontrada en un log.
+* **El Comando Corregido:**
+    *La versión anterior de este comando era incorrecta. `dog` es más inteligente que `dig` y no necesita la bandera `-x`.*
     ```bash
-    dog -x 8.8.4.4
+    # Simplemente pasa la IP como argumento
+    dog 8.8.4.4
     ```
-* **Análisis y Estrategia:**
-    * La bandera `-x` realiza una búsqueda inversa de DNS (consulta de registro PTR). En lugar de preguntar "¿Qué IP tiene este dominio?", pregunta "¿Qué dominio tiene esta IP?".
-* **Utilidad:** Un paso fundamental en cualquier investigación de seguridad o análisis forense. Te permite pasar de un simple dato (una IP) a un posible actor (un nombre de dominio), dándote mucho más contexto para continuar tu investigación.
+* **Análisis y Estrategia:** `dog` detecta automáticamente que la entrada es una dirección IP y realiza una búsqueda inversa (registro PTR).
+* **Resultado y Análisis:**
+    ```
+    PTR 4.4.8.8.in-addr.arpa. 20h38m09s   dns.google.
+    ```
+    El comando funciona y nos dice que la IP `8.8.4.4` pertenece a `dns.google`. Este es un paso fundamental en cualquier investigación para pasar de una IP a un actor o servicio conocido.
