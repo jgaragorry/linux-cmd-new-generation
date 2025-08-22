@@ -16,19 +16,21 @@
 `dust` no está en los repositorios de Ubuntu. La forma recomendada de instalarlo es a través de `cargo`, el gestor de paquetes de Rust.
 
 ```bash
-# 1. Asegúrate de tener Rust/Cargo instalado
-sudo apt install -y rustc cargo rust-src rust-doc
-# Verificar instalación
+# 1. INSTALAR RUSTUP (método oficial - mejor que apt)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# 2. Cargar Rust en tu sesión actual
+source "$HOME/.cargo/env"
+
+# 3. VERIFICAR (opcional pero recomendado)
 echo "rustc version: $(rustc --version)"
 echo "cargo version: $(cargo --version)"
-# Al final de ~/.bashrc 
-export PATH="$HOME/.cargo/bin:$PATH"
----------------
-# luego ejecuta
-source ~/.bashrc
 
-# 2. Instala dust
+# 4. INSTALAR dust (¡esto sí está bien!)
 cargo install du-dust
+
+# 5. VERIFICAR que dust se instaló
+dust --version
 ```
 
 ### Sintaxis Básica
