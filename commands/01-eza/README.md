@@ -21,7 +21,7 @@
 sudo apt update
 sudo apt install -y gpg wget
 
-# 2. Crear el directorio para las llaves GPG
+# 2. Instalar exa
 sudo apt install -y exa
 ```
 
