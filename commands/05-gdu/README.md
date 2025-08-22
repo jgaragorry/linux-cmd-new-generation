@@ -15,12 +15,15 @@
 `gdu` no está en los repositorios de Ubuntu. La forma recomendada de instalarlo es a través de `cargo`.
 
 ```bash
-# 1. Asegúrate de tener Rust/Cargo instalado
-# (El script principal del repositorio se encarga de esto)
-source "$HOME/.cargo/env"
+# Descargar
+curl -L https://github.com/dundee/gdu/releases/latest/download/gdu_linux_amd64.tgz | tar xz
 
-# 2. Instala gdu
-cargo install gdu
+# Dar permisos de ejecución y mover
+sudo chmod +x gdu_linux_amd64
+sudo mv gdu_linux_amd64 /usr/local/bin/gdu  # Mejor usar /usr/local/bin/
+
+# Verificar
+gdu --version
 ```
 
 ### Sintaxis Básica
