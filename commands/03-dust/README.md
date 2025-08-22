@@ -18,6 +18,12 @@
 ```bash
 # 1. Asegúrate de tener Rust/Cargo instalado
 sudo apt install -y rustc cargo rust-src rust-doc
+# Verificar instalación
+echo "rustc version: $(rustc --version)"
+echo "cargo version: $(cargo --version)"
+# Al final de ~/.bashrc 
+export PATH="$HOME/.cargo/bin:$PATH"
+---------------
 source "$HOME/.cargo/env"
 
 # 2. Instala dust
