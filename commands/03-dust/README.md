@@ -28,7 +28,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 source ~/.bashrc
 
 # 2. Instala dust
-cargo install dust
+cargo install du-dust
 ```
 
 ### Sintaxis Básica
