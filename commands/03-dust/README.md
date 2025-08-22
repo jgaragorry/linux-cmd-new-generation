@@ -19,7 +19,7 @@
 # 1. INSTALAR RUSTUP (método oficial - mejor que apt)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# 2. Cargar Rust en tu sesión actual
+# 2. Cargar Rust en tu sesión actual (para que qiede d eforma permantend anexa al fianld el archivo $HOME/.bashrc) 
 source "$HOME/.cargo/env"
 
 # 3. VERIFICAR (opcional pero recomendado)
