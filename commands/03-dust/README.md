@@ -25,7 +25,7 @@ echo "cargo version: $(cargo --version)"
 export PATH="$HOME/.cargo/bin:$PATH"
 ---------------
 # luego ejecuta
-source "$HOME/.cargo/env"
+source ~/.bashrc
 
 # 2. Instala dust
 cargo install dust
