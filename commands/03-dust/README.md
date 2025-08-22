@@ -17,7 +17,7 @@
 
 ```bash
 # 1. Asegúrate de tener Rust/Cargo instalado
-# (El script principal del repositorio se encarga de esto)
+sudo apt install -y rustc cargo rust-src rust-doc
 source "$HOME/.cargo/env"
 
 # 2. Instala dust
