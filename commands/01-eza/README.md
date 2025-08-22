@@ -1,8 +1,8 @@
-# comando `eza`
+# comando `exa`
 
 ## 🚀 La Alternativa Moderna a `ls` y `tree`
 
-`eza` es un reemplazo moderno para el comando `ls`. Escrito en Rust, es rápido, seguro y viene con características que `ls` no tiene por defecto.
+`exa` es un reemplazo moderno para el comando `ls`. Escrito en Rust, es rápido, seguro y viene con características que `ls` no tiene por defecto.
 
 ### ¿Qué es y por qué es mejor?
 
@@ -14,7 +14,7 @@
 
 ### Instalación en Ubuntu 24.04 LTS
 
-`eza` no está en los repositorios por defecto de Ubuntu 24.04, por lo que debemos añadir el repositorio de su mantenedor.
+`exa` no está en los repositorios por defecto de Ubuntu 24.04, por lo que debemos añadir el repositorio de su mantenedor.
 
 ```bash
 # 1. Instalar prerrequisitos
@@ -22,20 +22,7 @@ sudo apt update
 sudo apt install -y gpg wget
 
 # 2. Crear el directorio para las llaves GPG
-sudo mkdir -p /etc/apt/keyrings
-
-# 3. Descargar y añadir la llave GPG del repositorio
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-
-# 4. Añadir el repositorio a las fuentes de APT
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
-
-# 5. Dar permisos adecuados a los archivos
-sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-
-# 6. Actualizar la lista de paquetes e instalar eza
-sudo apt update
-sudo apt install -y eza
+sudo apt install -y exa
 ```
 
 ### Sintaxis Básica
@@ -43,12 +30,12 @@ sudo apt install -y eza
 La sintaxis es muy similar a `ls` para facilitar la transición.
 
 ```
-eza [OPCIONES] [RUTAS]
+exa [OPCIONES] [RUTAS]
 ```
 
 ### ¿Quién puede ejecutarlo?
 
-Cualquier usuario del sistema puede ejecutar `eza` para listar los archivos a los que tenga permiso de lectura.
+Cualquier usuario del sistema puede ejecutar `exa` para listar los archivos a los que tenga permiso de lectura.
 
 ### Argumentos y Opciones Clave
 
@@ -68,10 +55,10 @@ Cualquier usuario del sistema puede ejecutar `eza` para listar los archivos a lo
 Para reemplazar `ls` por completo, añade estos alias a tu archivo `~/.bash_aliases` o `~/.bashrc`:
 
 ```bash
-alias ls='eza --icons'
-alias ll='eza -l --icons'
-alias la='eza -la --icons'
-alias ltree='eza --tree --icons'
+alias ls='exa --icons'
+alias ll='exa -l --icons'
+alias la='exa -la --icons'
+alias ltree='exa --tree --icons'
 ```
 *Nuestro script `configure_aliases.sh` ya hace esto por ti.*
 
@@ -97,7 +84,7 @@ la
 ```bash
 # Navega al directorio del proyecto
 cd /ruta/a/tu/proyecto
-eza --tree --git
+exa --tree --git
 ```
 **Utilidad:** Este comando te dará un mapa visual de todo el proyecto. Además, al lado de cada archivo modificado aparecerá una `M` amarilla, o una `N` verde para los nuevos, dándote una visión clara del estado actual del repositorio sin necesidad de ejecutar `git status`.
 
@@ -108,6 +95,6 @@ eza --tree --git
 **Comando:**
 ```bash
 # El flag -s ordena por un campo, -r revierte el orden (de mayor a menor)
-eza -l -s size -r /var/log
+exa -l -s size -r /var/log
 ```
 **Utilidad:** Este comando es mucho más directo que un `ls -l | sort -k 5 -nr`. Te muestra inmediatamente los archivos más grandes en la parte superior, permitiéndote identificar y actuar sobre los logs que están consumiendo espacio de forma descontrolada.
