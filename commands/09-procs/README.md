@@ -39,11 +39,9 @@ Cualquier usuario. Con `sudo` muestra más información sobre procesos del siste
 | Opción           | Descripción                                                                 |
 | ---------------- | --------------------------------------------------------------------------- |
 | `--tree`         | Muestra los procesos en formato de árbol.                                   |
-| `--sorta`        | Ordena en orden ascendente (por CPU por defecto).                           |
-| `--sortd`        | Ordena en orden descendente (por CPU por defecto).                          |
-| `--tcp`          | Muestra la columna de puertos TCP.                                          |
-| `--udp`          | Muestra la columna de puertos UDP.                                          |
-| `-w`, `--watch`  | Ejecuta `procs` repetidamente, como `top`.                                  |
+| `procs bash`     | lista los procesos que inian con bash).                                     |
+| `procs 0`        | lsito lso proceso con PID 0                                                 |
+
 
 ### Configuración de Alias Permanente (Bash)
 
@@ -81,9 +79,32 @@ procs --tree mariadb
 
 **Tarea:** Sospechas que un usuario (`www-data`, por ejemplo) está consumiendo demasiados recursos. Quieres observar en tiempo real qué procesos está ejecutando y cuál es su consumo.
 
-**Comando:**
+**Comando: Personalización Avanzada**
 ```bash
 # El modo watch (--watch) refresca la pantalla, y el argumento filtra por usuario
-procs --watch www-data
+procs --watch 2 www-data
+procs --watch 1 --sortd cpu  # Top procesos por CPU
+procs --watch 3 --sortd mem  # Top procesos por memoria
 ```
+
+**Comando: Buscar Procesos Específicos**
+```bash
+# Buscar Procesos Específicos Buscar systemd AND root
+ procs -a systemd root
+
+# Buscar Procesos Específicos Buscar systemd OR root
+procs -o systemd root
+```
+
+**Comando:**
+```bash
+# Configuración persistente
+procs --generate-config > ~/.config/procs/procs.toml
+
+# Usar tema de colores
+procs --theme dark
+procs --theme light
+procs --theme auto
+```
+
 **Utilidad:** Este comando te da un `top` personalizado, filtrado solo para el usuario `www-data`. Es una forma extremadamente rápida de aislar y monitorizar la actividad de un usuario sin tener que configurar filtros complejos en `top` o `htop`.
