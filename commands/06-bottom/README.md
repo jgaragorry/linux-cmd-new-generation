@@ -59,6 +59,41 @@ echo "     btm --help       # Ver ayuda"
 echo "     btm --read-only  # Modo solo lectura"
 echo "     btm -t 2000      # Refresco cada 2 segundos"
 ```
+### Instalación en Ubuntu 24.04 LTS
+
+# 2.1 En caso de querer removerlo
+```bash
+#!/bin/bash
+# Script para desinstalar bottom (btm) instalado manualmente
+
+echo "[+] Desinstalando bottom (btm)..."
+
+# Remover binario
+if [ -f "/usr/local/bin/btm" ]; then
+    echo "[+] Removiendo binario de /usr/local/bin/btm..."
+    sudo rm -f /usr/local/bin/btm
+else
+    echo "[ℹ] Binario /usr/local/bin/btm no encontrado"
+fi
+
+# Remover configuración
+if [ -d "$HOME/.config/bottom" ]; then
+    echo "[+] Removiendo configuración de $HOME/.config/bottom..."
+    rm -rf "$HOME/.config/bottom"
+else
+    echo "[ℹ] Configuración en $HOME/.config/bottom no encontrada"
+fi
+
+# Verificar desinstalación
+echo "[+] Verificando desinstalación..."
+if ! command -v btm &> /dev/null; then
+    echo "[✅] bottom desinstalado exitosamente!"
+else
+    echo "[⚠] ¡Advertencia! btm todavía parece estar instalado en:"
+    which btm
+fi
+```
+
 El comando para ejecutarlo es `btm`.
 
 ### Sintaxis Básica
