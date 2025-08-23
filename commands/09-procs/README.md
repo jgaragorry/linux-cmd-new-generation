@@ -14,7 +14,9 @@
 
 ### Instalación en Ubuntu 24.04 LTS
 
-`procs` no está en los repositorios de Ubuntu. Se instala con `cargo`.
+```bash
+sudo snap install procs
+```
 
 ```bash
 # 1. Asegúrate de tener Rust/Cargo instalado
