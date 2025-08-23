@@ -35,7 +35,7 @@ Cualquier usuario. Para ver detalles de todos los procesos o enviar señales a p
 
 | Opción           | Descripción                                                                 |
 | ---------------- | --------------------------------------------------------------------------- |
-| `-l`, `--low-color` | Desactiva los colores verdaderos, para terminales antiguas.               |
+| `-lc`, `--low-color` | Desactiva los colores verdaderos, para terminales antiguas.               |
 | `-v`, `--version` | Muestra la versión.                                                       |
 | `F1` o `h`       | Dentro de la aplicación, muestra la ayuda.                                  |
 | `F2` o `o`       | Dentro de la aplicación, muestra las opciones de configuración.             |
