@@ -14,11 +14,50 @@
 
 ### Instalación en Ubuntu 24.04 LTS
 
-
-```bash
 # 2. Instala bottom
-sudo snap install bottom
+```bash
+#!/bin/bash
+# Script para instalar la última versión estable de bottom (btm) en Linux
 
+# 1. Remover instalaciones previas conflictivas (snap, versiones antiguas)
+echo "[+] Removiendo instalaciones previas de bottom (snap)..."
+sudo snap remove bottom 2>/dev/null || true
+
+# 2. Descargar la última versión estable (Verificar la versión más reciente en GitHub)
+BOTTOM_VERSION="0.10.2"
+echo "[+] Descargando bottom versión ${BOTTOM_VERSION}..."
+wget -q --show-progress https://github.com/ClementTsang/bottom/releases/download/${BOTTOM_VERSION}/bottom_x86_64-unknown-linux-gnu.tar.gz
+
+# 3. Verificar que la descarga fue exitosa
+if [ ! -f "bottom_x86_64-unknown-linux-gnu.tar.gz" ]; then
+    echo "[!] Error: No se pudo descargar el archivo"
+    exit 1
+fi
+
+# 4. Extraer el archivo
+echo "[+] Extrayendo archivos..."
+tar -xzf bottom_x86_64-unknown-linux-gnu.tar.gz
+
+# 5. Instalar el binario en /usr/local/bin
+echo "[+] Instalando binario en /usr/local/bin/btm..."
+sudo mv btm /usr/local/bin/
+sudo chmod +x /usr/local/bin/btm
+
+# 6. Limpiar archivos temporales
+echo "[+] Limpiando archivos temporales..."
+rm -f bottom_x86_64-unknown-linux-gnu.tar.gz
+
+# 7. Verificar la instalación
+echo "[+] Verificando la instalación..."
+btm --version
+
+echo ""
+echo "[✅] Instalación completada exitosamente!"
+echo "[ℹ]  Ejecuta 'btm' para usar bottom"
+echo "[ℹ]  Comandos útiles:"
+echo "     btm --help       # Ver ayuda"
+echo "     btm --read-only  # Modo solo lectura"
+echo "     btm -t 2000      # Refresco cada 2 segundos"
 ```
 El comando para ejecutarlo es `btm`.
 
