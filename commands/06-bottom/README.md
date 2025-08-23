@@ -14,15 +14,11 @@
 
 ### Instalación en Ubuntu 24.04 LTS
 
-`bottom` no está en los repositorios de Ubuntu. Se recomienda instalarlo a través de `cargo`.
 
 ```bash
-# 1. Asegúrate de tener Rust/Cargo instalado
-# (El script principal del repositorio se encarga de esto)
-source "$HOME/.cargo/env"
-
 # 2. Instala bottom
-cargo install bottom
+sudo snap install bottom
+
 ```
 El comando para ejecutarlo es `btm`.
 
