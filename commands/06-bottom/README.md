@@ -16,81 +16,18 @@
 
 # 2. Instala bottom
 ```bash
-#!/bin/bash
-# Script para instalar la última versión estable de bottom (btm) en Linux
-
-# 1. Remover instalaciones previas conflictivas (snap, versiones antiguas)
-echo "[+] Removiendo instalaciones previas de bottom (snap)..."
-sudo snap remove bottom 2>/dev/null || true
-
-# 2. Descargar la última versión estable (Verificar la versión más reciente en GitHub)
-BOTTOM_VERSION="0.10.2"
-echo "[+] Descargando bottom versión ${BOTTOM_VERSION}..."
-wget -q --show-progress https://github.com/ClementTsang/bottom/releases/download/${BOTTOM_VERSION}/bottom_x86_64-unknown-linux-gnu.tar.gz
-
-# 3. Verificar que la descarga fue exitosa
-if [ ! -f "bottom_x86_64-unknown-linux-gnu.tar.gz" ]; then
-    echo "[!] Error: No se pudo descargar el archivo"
-    exit 1
-fi
-
-# 4. Extraer el archivo
-echo "[+] Extrayendo archivos..."
-tar -xzf bottom_x86_64-unknown-linux-gnu.tar.gz
-
-# 5. Instalar el binario en /usr/local/bin
-echo "[+] Instalando binario en /usr/local/bin/btm..."
-sudo mv btm /usr/local/bin/
-sudo chmod +x /usr/local/bin/btm
-
-# 6. Limpiar archivos temporales
-echo "[+] Limpiando archivos temporales..."
-rm -f bottom_x86_64-unknown-linux-gnu.tar.gz
-
-# 7. Verificar la instalación
-echo "[+] Verificando la instalación..."
-btm --version
-
-echo ""
-echo "[✅] Instalación completada exitosamente!"
-echo "[ℹ]  Ejecuta 'btm' para usar bottom"
-echo "[ℹ]  Comandos útiles:"
-echo "     btm --help       # Ver ayuda"
-echo "     btm --read-only  # Modo solo lectura"
-echo "     btm -t 2000      # Refresco cada 2 segundos"
+sudo snap install bottom
 ```
 
-# 2.1 En caso de querer removerlo
+# 2.1 Verificar la Instalcion
 ```bash
-#!/bin/bash
-# Script para desinstalar bottom (btm) instalado manualmente
+bottom --version
+```
 
-echo "[+] Desinstalando bottom (btm)..."
-
-# Remover binario
-if [ -f "/usr/local/bin/btm" ]; then
-    echo "[+] Removiendo binario de /usr/local/bin/btm..."
-    sudo rm -f /usr/local/bin/btm
-else
-    echo "[ℹ] Binario /usr/local/bin/btm no encontrado"
-fi
-
-# Remover configuración
-if [ -d "$HOME/.config/bottom" ]; then
-    echo "[+] Removiendo configuración de $HOME/.config/bottom..."
-    rm -rf "$HOME/.config/bottom"
-else
-    echo "[ℹ] Configuración en $HOME/.config/bottom no encontrada"
-fi
-
-# Verificar desinstalación
-echo "[+] Verificando desinstalación..."
-if ! command -v btm &> /dev/null; then
-    echo "[✅] bottom desinstalado exitosamente!"
-else
-    echo "[⚠] ¡Advertencia! btm todavía parece estar instalado en:"
-    which btm
-fi
+# 2.2 Crear alias (opcional pero recomendado)
+```bash
+echo "alias btm='bottom'" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 El comando para ejecutarlo es `btm`.
@@ -105,16 +42,6 @@ btm [OPCIONES]
 
 Cualquier usuario puede ejecutarlo. Algunas métricas, como las de ciertos procesos del sistema, pueden requerir `sudo`.
 
-### Argumentos y Opciones Clave
-
-| Opción               | Descripción                                                              |
-| -------------------- | ------------------------------------------------------------------------ |
-| `-C`, `--config`     | Especifica una ruta a un archivo de configuración personalizado.         |
-| `-b`, `--basic`      | Inicia en modo básico, sin gráficos ni colores avanzados.                |
-| `-g`, `--group`      | Agrupa procesos con el mismo nombre.                                     |
-| `-T`, `--tree`       | Inicia con la vista de árbol de procesos activada.                       |
-| `-t`, `--temperature_type` | Especifica la unidad de temperatura (k, f, c).                     |
-
 ### Configuración de Alias Permanente (Bash)
 
 Aunque `btop` es un reemplazo más directo, si prefieres `bottom`, este alias es útil.
@@ -125,33 +52,158 @@ alias top='btm'
 
 ### 🎓 Ejercicios Prácticos
 
-#### Ejercicio 1: Crear un Dashboard de Monitorización Específico
-
-**Tarea:** Eres un administrador de bases de datos. Quieres un monitor que se enfoque en el uso de CPU, la actividad de I/O del disco donde reside la base de datos y los procesos específicos de PostgreSQL.
+#### Ejercicio 1: MONITOREO GENERAL
 
 **Comando:**
 ```bash
-# Inicia btm y personaliza la vista
+# Monitor estándar (1 segundo refresco)
 btm
+
+# Monitor con refresco lento (3 segundos) - Ideal para servidores
+btm --rate 3000
+
+# Monitor minimalista (modo básico, menos consumo)
+btm --basic --rate 5000
 ```
 **Utilidad:** Dentro de `btm`, puedes presionar `L` para cambiar el layout. Puedes configurar un layout que solo muestre los widgets de CPU, Disk I/O y la tabla de procesos. Luego, en la tabla de procesos, puedes filtrar (`/`) por "postgres". `btm` recordará tu layout, dándote un dashboard a medida cada vez que lo inicies.
 
-#### Ejercicio 2: Diagnosticar Picos de Carga de CPU
-
-**Tarea:** Los usuarios reportan que una aplicación web se vuelve lenta intermitentemente. Sospechas que hay picos de carga de CPU.
+#### Ejercicio 2: VISUALIZACIÓN DE PROCESOS
 
 **Comando:**
 ```bash
-btm
+# Ver procesos en árbol jerárquico (muy útil)
+btm --tree
+
+# Agrupar procesos por nombre
+btm --group_processes
+
+# Mostrar comando completo instead de nombre
+btm --process_command
 ```
-**Utilidad:** Mantén `btm` abierto en una pantalla. Gracias a sus gráficos históricos, cuando ocurra el pico de lentitud, podrás ver una subida abrupta en el gráfico de CPU. Al mismo tiempo, en la tabla de procesos (ordenada por uso de CPU), verás qué proceso fue el causante del pico, permitiéndote diagnosticar el problema con precisión.
 
-#### Ejercicio 3: Monitorizar la Temperatura del Servidor Durante una Tarea Intensiva
-
-**Tarea:** Vas a ejecutar una compilación de software muy larga o un backup intensivo. Quieres asegurarte de que la temperatura del CPU del servidor se mantenga dentro de límites seguros.
+#### Ejercicio 3: MONITOREO DE RECURSOS ESPECÍFICOS
 
 **Comando:**
 ```bash
-btm -t c
+# Enfoque en CPU y Memoria
+btm --theme default --rate 2000
+
+# Monitorear actividad de red (bits por segundo)
+btm --network_use_bytes
+
+# Monitorear disco y procesos
+btm --basic --rate 3000
 ```
-**Utilidad:** El widget de temperatura (`--temperature_type c` para Celsius) te dará una lectura en tiempo real de los sensores del sistema. Si ves que la temperatura se acerca a niveles peligrosos durante la tarea, puedes decidir pausarla o reducir su prioridad para evitar daños por sobrecalentamiento.
+
+#### Ejercicio 4: TEMAS DE COLORES (Para mejor visualización)
+
+**Comando:**
+```bash
+# Tema oscuro estándar
+btm --theme default
+
+# Tema Gruvbox (excelente contraste)
+btm --theme gruvbox
+
+# Tema Nord (azul profesional)
+btm --theme nord
+
+# Tema para fondos claros (SSH desde terminal clara)
+btm --theme default-light
+```
+
+#### Ejercicio 5: MODO SÓLO LECTURA (Para monitoreo seguro)
+
+**Comando:**
+```bash
+# Simplemente no usar teclas de interacción (k, F9)
+btm --basic --rate 3000
+```
+
+#### Ejercicio 6: COMANDOS AVANZADOS
+
+**Comando:**
+```bash
+# Mostrar memoria cache y buffers
+btm --enable_cache_memory
+
+# CPU usage sin normalizar por núcleos
+btm --unnormalized_cpu
+
+# Leyenda de red en posición específica
+btm --network_legend right
+```
+
+#### Ejercicio 7: Para debugging de performance:
+
+**Comando:**
+```bash
+btm --tree --rate 2000
+```
+
+#### Ejercicio 8: Para monitoreo de servidor remoto:
+
+**Comando:**
+```bash
+btm --basic --rate 5000
+```
+
+#### Ejercicio 9: Para analizar consumo de memoria:
+
+**Comando:**
+```bash
+btm --enable_cache_memory --theme gruvbox
+```
+
+#### Ejercicio 10: Para monitoreo de red:
+
+**Comando:**
+```bash
+btm --network_use_bytes --rate 1000
+```
+
+#### Ejercicio 11: CONFIGURACIÓN PERSISTENTE:
+
+**Comando:**
+```bash
+# Generar configuración personalizada
+mkdir -p ~/.config/bottom
+btm --generate-config > ~/.config/bottom/bottom.toml
+
+# Editar configuración (opciones preferidas)
+nano ~/.config/bottom/bottom.toml
+```
+
+#### Ejercicio 12: Ejemplo de configuración útil para administradores:
+
+**Comando:**
+```bash
+rate = 3000
+theme = "gruvbox"
+group_processes = true
+tree = true
+basic = false
+```
+
+#### Ejercicio 12:  RESUMEN EJECUTIVO:
+
+**Comando:**
+```bash
+Procedimiento que SÍ funciona:
+
+sudo snap install bottom
+
+Usar bottom o crear alias btm
+
+Usar --theme instead de --color
+
+Usar --rate para tiempo de refresco
+
+Comando estrella: btm --tree --rate 3000
+
+Para servidores: btm --basic --rate 5000
+Para debugging: btm --tree --theme gruvbox
+Para redes: btm --network_use_bytes
+
+¡Este procedimiento está probado y garantizado que funciona en Ubuntu 22.04!
+```
