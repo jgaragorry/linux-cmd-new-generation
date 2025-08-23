@@ -1,200 +1,137 @@
-# Comando `fdfind` (`fd`)
-
-`fd` es una alternativa moderna y eficiente al comando `find`, diseñada para facilitar búsquedas en el sistema de archivos con una sintaxis más intuitiva y rápida.
-
----
-
-## 🛠️ Instalación
-
-```bash
-sudo apt update
-sudo apt install -y fd-find
-echo "alias fd='fdfind'" >> ~/.bashrc
-source ~/.bashrc
-```
-
----
-
-## 👤 Comandos por Perfil Técnico
-
-### 🔧 DevOps & SRE
-
-```bash
-fd -e conf --changed-within 1d . /etc
-fd -e sh -e py "deploy|script|ansible" . /opt
-fd -e log --size +10M . /var/log
-fd --changed-within 2h . /jenkins/workspace
-```
-
-### 🔐 DevSecOps & SecOps
-
-```bash
-fd "password|secret|key|token" . /etc --exec grep -l {} \;
-fd . / --exec bash -c '[[ -f {} && -w {} ]] && ls -la {}'
-fd . / --exec bash -c '[[ -u {} ]] && echo "SUID: {}"'
-fd -e sh -e py "\.|hidden" . /tmp /dev/shm
-```
-
-### 🖥️ SysAdmins & SysOps
-
-```bash
-fd -e tmp -e temp --changed-before 30d . /tmp --exec rm -v {} \;
-fd -e conf -e cfg -e ini . /etc --list-details
-fd --size +100M . /home --list-details
-fd -e service -e timer . /etc/systemd
-```
-
-### 🌐 NetOps
-
-```bash
-fd "network|net|dns|iptables|ufw" . /etc --extension conf
-fd -e sh -e py "network|bridge|vlan" . /usr/local/bin
-fd "interfaces|netplan|route" . /etc
-```
-
-### 👨‍💻 Developers & Programmers
-
-```bash
-fd -e py -e js -e java -e go "TODO|FIXME|HACK" . /src
-fd "requirements|package\.json|gemfile|pom.xml" .
-fd -e pyc -e class -e o -e so . --exec rm {} \;
-fd -e js "function.*api|const.*config" . /src
-```
-
-### 📊 Data Scientists & Engineers
-
-```bash
-fd -e csv -e parquet -e avro --size +1G . /data
-fd -e ipynb "analysis|model|experiment" . /notebooks
-fd "database|db|postgres|mysql|mongodb" . /etc --extension conf
-fd -e log "pipeline|etl|processing" . /logs
-```
-
-### 🧑‍🏫 Principiantes & Usuarios Normales
-
-```bash
-fd "documento|proyecto|tesis" . ~/Documents
-fd -e jpg -e png -e gif -e mp4 . ~/Pictures ~/Videos
-fd -e pdf -e docx -e xlsx -e txt . ~/Downloads
-fd -e mp3 -e wav -e flac . ~/Music
-```
-
----
-
 ## ⚙️ Características Principales
+
+A continuación se presentan comandos clave de `fd`, cada uno con una explicación detallada de su propósito y sintaxis.
+
+---
+
+### 🔄 Comparación de velocidad entre `fd` y `find`
 
 ```bash
 time fd "*.conf" . /etc
+```
+- **Qué hace**: Mide el tiempo que tarda `fd` en buscar archivos con extensión `.conf` dentro de `/etc`.
+- **Opciones**:
+  - `"*.conf"`: patrón de búsqueda para archivos `.conf`.
+  - `.`: directorio actual como punto de partida.
+  - `/etc`: directorio objetivo.
+- **Cuándo usarlo**: Para comparar rendimiento entre herramientas de búsqueda.
+
+```bash
 time find /etc -name "*.conf"
+```
+- **Qué hace**: Mide el tiempo que tarda `find` en buscar archivos `.conf` en `/etc`.
+- **Comparación**: `fd` suele ser más rápido y más legible.
+
+---
+
+### 📋 Listar archivos con detalles
+
+```bash
 fd -e conf . /etc --list-details
+```
+- **Qué hace**: Busca archivos con extensión `.conf` en `/etc` y muestra detalles como permisos, tamaño y fecha.
+- **Opciones**:
+  - `-e conf`: filtra por extensión `.conf`.
+  - `.`: punto de partida.
+  - `/etc`: directorio objetivo.
+  - `--list-details`: muestra metadatos del archivo.
+- **Cuándo usarlo**: Para inspeccionar configuraciones del sistema.
+
+---
+
+### 📦 Buscar archivos grandes
+
+```bash
 fd --size +100M . /home --list-details
+```
+- **Qué hace**: Busca archivos mayores a 100 MB en `/home` y muestra sus detalles.
+- **Opciones**:
+  - `--size +100M`: archivos mayores a 100 megabytes.
+  - `.`: punto de partida.
+  - `/home`: directorio objetivo.
+  - `--list-details`: muestra información adicional.
+- **Cuándo usarlo**: Para identificar archivos que ocupan mucho espacio.
+
+---
+
+### 🔍 Búsqueda insensible a mayúsculas
+
+```bash
 fd -i "database" .
+```
+- **Qué hace**: Busca archivos o carpetas que contengan la palabra "database", sin importar mayúsculas/minúsculas.
+- **Opciones**:
+  - `-i`: búsqueda insensible a mayúsculas.
+  - `"database"`: patrón de búsqueda.
+  - `.`: directorio actual.
+- **Cuándo usarlo**: Cuando no estás seguro de la capitalización exacta.
+
+---
+
+### 🚫 Excluir directorios
+
+```bash
 fd --exclude node_modules --exclude vendor .
+```
+- **Qué hace**: Busca archivos en el directorio actual, excluyendo `node_modules` y `vendor`.
+- **Opciones**:
+  - `--exclude`: omite directorios o archivos que coincidan con el patrón.
+  - `.`: punto de partida.
+- **Cuándo usarlo**: Para evitar resultados irrelevantes o pesados.
+
+---
+
+### 📁 Limitar profundidad de búsqueda
+
+```bash
 fd --max-depth 2 "*.conf" /etc
+```
+- **Qué hace**: Busca archivos `.conf` en `/etc`, pero solo hasta dos niveles de subdirectorios.
+- **Opciones**:
+  - `--max-depth 2`: limita la profundidad de búsqueda.
+  - `"*.conf"`: patrón de archivo.
+  - `/etc`: directorio objetivo.
+- **Cuándo usarlo**: Para evitar búsquedas profundas que tarden mucho.
+
+---
+
+### 🧹 Buscar archivos temporales
+
+```bash
 fd "*.tmp" .
+```
+- **Qué hace**: Busca archivos con extensión `.tmp` en el directorio actual.
+- **Opciones**:
+  - `"*.tmp"`: patrón de archivo temporal.
+  - `.`: punto de partida.
+- **Cuándo usarlo**: Para limpieza de archivos temporales.
+
+---
+
+### 🔤 Soporte para caracteres especiales
+
+```bash
 fd "café|naïve" .
+```
+- **Qué hace**: Busca archivos que contengan las palabras "café" o "naïve".
+- **Opciones**:
+  - `"café|naïve"`: expresión regular con alternativas.
+  - `.`: punto de partida.
+- **Cuándo usarlo**: Para búsquedas con acentos o caracteres Unicode.
+
+---
+
+### 🧪 Uso de expresiones regulares
+
+```bash
 fd "^config.*\.json$" .
 ```
+- **Qué hace**: Busca archivos que comiencen con "config" y terminen en `.json`.
+- **Opciones**:
+  - `"^config.*\.json$"`: expresión regular.
+  - `.`: punto de partida.
+- **Cuándo usarlo**: Para búsquedas avanzadas con patrones precisos.
 
 ---
 
-## 🔌 Integraciones Útiles
-
-```bash
-fd -e py . | xargs grep "import pandas"
-fd -e js . /src | xargs grep -l "axios"
-fd -e conf . /etc | fzf --preview 'cat {}'
-fd -e log . /var/log | fzf -m --bind 'enter:execute(less {})'
-fd -e log --changed-before 7d . /logs --exec gzip {} \;
-fd -e conf . /etc --exec cp {} /backup/ \;
-fd -e sh . /scripts --exec chmod +x {} \;
-```
-
----
-
-## 🧩 Configuración Personalizada
-
-```bash
-mkdir -p ~/.config/fd
-fd --generate-config > ~/.config/fd/config.toml
-nano ~/.config/fd/config.toml
-
-echo "alias findconf='fd -e conf . /etc --list-details'" >> ~/.bashrc
-echo "alias findrecent='fd --changed-within 1d .'" >> ~/.bashrc
-echo "alias findlarge='fd --size +100M .'" >> ~/.bashrc
-echo "alias findscripts='fd -e sh -e py -e js . /usr/local/bin'" >> ~/.bashrc
-source ~/.bashrc
-```
-
----
-
-## 🚀 Consejos de Rendimiento
-
-```bash
-fd "*.log" . /var/log/app-specific
-fd "access_.*\.log" . /var/log/nginx
-fd -e log --size +10M --changed-within 7d . /var/log
-fd --exclude node_modules --exclude .git "*.js" .
-fd --max-depth 3 "*.conf" /etc
-fd "*.db" . /var/lib/mysql
-```
-
----
-
-## 🔍 Comparación con `find`
-
-```bash
-# Buscar archivos .conf
-fd "*.conf" . /etc
-find /etc -name "*.conf"
-
-# Archivos .py mayores a 1MB
-fd -e py --size +1M
-find -name "*.py" -size +1M
-
-# Listar detalles
-fd --list-details
-find -ls
-
-# Archivos .tmp
-fd "*.tmp" .
-find . -name "*.tmp"
-
-# Cambiar permisos
-find . -name "*.conf" -exec chmod 644 {} \;
-
-# Logs >10MB y modificados hace más de 30 días
-find . -type f -name "*.log" -size +10M -mtime +30
-
-# Archivos con SUID
-find /etc -perm -u=s -type f
-```
-
----
-
-## 🔄 Flujos de Trabajo
-
-```bash
-fd -e conf --changed-within 1d . /etc --list-details
-fd -e log --size +50M . /var/log --list-details
-fd -e sh . /usr/local/bin --exec bash -c '[[ -x {} ]] && ls -la {}'
-fd "password|secret|key" . /etc /home --exec grep -l {} \;
-fd -e conf . /etc --exec stat -c "%a %n" {} \;
-fd . /usr/bin /usr/sbin --exec bash -c '[[ -u {} || -g {} ]] && ls -la {}'
-fd -e pyc -e class -e o -e so . --exec rm {} \;
-fd "node_modules|vendor|__pycache__" . --exec rm -rf {} \;
-fd -e log --changed-before 7d . /tmp --exec rm {} \;
-```
-
----
-
-## 📌 Notas Importantes
-
-```bash
-sudo fd -e conf . /etc
-sudo fd -e log . /var/log --exec ls -la {} \;
-fd --max-depth 1 . /mnt/nas-share
-fd "*.db" . /var/lib/mysql
-fd . /
-fd "*.log" . /var/log/specific-app
-```
+¿Te gustaría que también reescriba las secciones de Integraciones, Configuración Personalizada y Flujos de Trabajo con este mismo nivel de detalle?
