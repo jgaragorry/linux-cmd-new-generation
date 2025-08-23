@@ -50,7 +50,4 @@ sudo glances
 **Procedimiento:**
 1.  Una vez dentro de la interfaz de `glances`, observa la sección de procesos.
 2.  Presiona la tecla `d` para mostrar/ocultar las estadísticas de I/O de disco.
-3.  Presiona la tecla `i` para ordenar la lista de procesos por su actividad de I/O (lectura/escritura).
-**Utilidad:** El proceso que esté en la cima de la lista es el culpable de la alta actividad de disco. `glances` te muestra al instante cuántos bytes por segundo está utilizando, permitiéndote diagnosticar cuellos de botella de I/O en segundos sin necesidad de otra herramienta.
-
 ---
