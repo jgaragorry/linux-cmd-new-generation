@@ -18,14 +18,6 @@
 sudo snap install procs
 ```
 
-```bash
-# 1. Asegúrate de tener Rust/Cargo instalado
-source "$HOME/.cargo/env"
-
-# 2. Instala procs
-cargo install procs
-```
-
 ### Sintaxis Básica
 
 ```
