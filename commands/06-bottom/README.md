@@ -59,7 +59,6 @@ echo "     btm --help       # Ver ayuda"
 echo "     btm --read-only  # Modo solo lectura"
 echo "     btm -t 2000      # Refresco cada 2 segundos"
 ```
-### Instalación en Ubuntu 24.04 LTS
 
 # 2.1 En caso de querer removerlo
 ```bash
