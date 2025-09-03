@@ -1,110 +1,156 @@
-# comando `lnav`
+# 🧠 Comando `lnav` — Log File Navigator
 
-## 🚀 El Navegador de Logs Avanzado para la Terminal
+## 📌 Descripción General
+`lnav` (Log File Navigator) es una herramienta interactiva para visualizar, analizar y consultar archivos de log directamente desde la terminal. Convierte logs planos en una base de datos estructurada y navegable en tiempo real, con soporte para SQL, resaltado de errores y vistas cronológicas.
 
-`lnav` (Log File Navigator) es mucho más que un simple visor de logs. Es una herramienta de análisis y troubleshooting interactiva que transforma tus archivos de log de texto plano en una base de datos estructurada y consultable en tiempo real.
+---
 
-### ¿Qué es y por qué es mejor?
-
--   **Unificación Automática:** Su superpoder. `lnav` puede abrir múltiples archivos o un directorio entero (como `/var/log`), detectar sus formatos y fusionarlos en una **única vista ordenada cronológicamente**. Se acabó el `tail -f` en 5 ventanas distintas.
--   **Comprensión de Formatos:** Reconoce docenas de formatos de log comunes (syslog, logs de acceso web, JSON, etc.) y los analiza en campos estructurados, permitiendo un filtrado y análisis mucho más profundo.
--   **Consultas SQL:** Su característica más potente. Te permite ejecutar consultas SQL directamente sobre tus archivos de log para agregar, filtrar y correlacionar datos de formas que serían imposibles con `grep` y `awk`.
--   **Vistas Avanzadas:** Ofrece una vista de histograma para detectar picos de actividad, resaltado de sintaxis automático (errores en rojo, warnings en amarillo) y filtrado interactivo.
-
-### Instalación en Ubuntu 24.04 LTS
-
-`lnav` está disponible directamente en los repositorios oficiales de Ubuntu 24.04.
+## 🧰 Instalación en Ubuntu Server 20.04 / 24.04 LTS
 
 ```bash
 sudo apt update
 sudo apt install -y lnav
 ```
 
-### 🧠 ¡Importante! Cómo Funciona `lnav` (Una Herramienta Interactiva)
-
-A diferencia de `cat` o `grep`, `lnav` es una aplicación de terminal **interactiva y de pantalla completa**.
-
-1.  Cuando ejecutas `lnav`, **tomará el control de toda tu ventana de terminal**. Verás una nueva interfaz con tus logs.
-2.  Para interactuar, usa las teclas. Las más importantes para empezar son:
-    * **`q`**: Para **Salir** (Quit) de `lnav` y volver a tu terminal normal.
-    * **Flechas (↑ ↓)**: Para desplazarte arriba y abajo.
-    * **`e`**: Para saltar al siguiente mensaje de **E**rror.
-    * **`w`**: Para saltar a la siguiente **W**arning (advertencia).
-    * **`;`**: Para abrir el prompt de **SQL**.
-
-### 🎓 Guía de Troubleshooting Avanzado con `lnav` por Rol
+✅ Disponible en los repositorios oficiales. No requiere entorno gráfico.
 
 ---
 
-#### 🛡️ Para el Administrador de Sistemas / SysOps
+## 🧑‍💻 Uso Básico
 
-**Receta: Correlación de Eventos en Todo el Sistema**
-* **Objetivo:** Investigar un problema reportado por un usuario sobre una "lentitud del sistema" a una hora específica.
-* **El Comando:**
-    ```bash
-    # Abrimos el directorio completo de logs del sistema
-    sudo lnav /var/log
-    ```
-* **La Acción dentro de `lnav`:**
-    1.  Una vez en la interfaz de `lnav`, presiona la tecla `g`. Escribe la hora del incidente (ej: `22:30`) y presiona Enter para saltar a ese momento.
-    2.  Presiona `e` o `w` repetidamente para navegar entre los errores y advertencias que ocurrieron alrededor de esa hora.
-* **Análisis y Estrategia:** `lnav` te presenta una línea de tiempo única de todo lo que ocurrió en el servidor. Este método te permite ver la "película completa" y encontrar la causa-efecto entre diferentes servicios del sistema.
-* **Resultado Esperado:** Verás una interfaz a pantalla completa con todos los logs de `/var/log` fusionados y ordenados por fecha. Podrás navegar y encontrar la causa del problema correlacionando eventos.
+```bash
+lnav /var/log
+```
+
+🔎 Abre todos los archivos dentro de `/var/log`, detecta sus formatos y los fusiona en una vista cronológica interactiva.
 
 ---
 
-#### ⚙️ Para el Ingeniero DevOps / DevSecOps
+## 🧭 Navegación Interactiva
 
-**Receta: Análisis Estructurado de Logs de Aplicación (JSON)**
-* **Objetivo:** Encontrar en un log JSON todas las peticiones fallidas (HTTP 5xx) y extraer el `user_id` de cada una.
-* **El Comando:**
-    > **Nota:** La siguiente ruta es un ejemplo. Deberás reemplazarla con la ruta a tu propio archivo de log. Si no tienes uno, sigue los pasos de prueba.
-
-    ```bash
-    lnav /ruta/a/tu/app.json.log
-    ```
-* **Cómo Probarlo Sin Un Log Real (¡Recomendado!):**
-    1.  **Crea un archivo de log de prueba:**
-        ```bash
-        echo '{"timestamp":"2025-08-21T10:00:00","level":"ERROR","status":500,"user_id":"user-123","trx_id":"abc-xyz"}' > /tmp/test.json.log
-        echo '{"timestamp":"2025-08-21T10:01:00","level":"INFO","status":200,"user_id":"user-456","trx_id":"def-uvw"}' >> /tmp/test.json.log
-        ```
-    2.  **Abre el archivo de prueba con lnav:**
-        ```bash
-        lnav /tmp/test.json.log
-        ```
-* **La Acción dentro de `lnav` (SQL Query):**
-    1.  Dentro de `lnav`, presiona la tecla `;` para abrir el prompt de SQL.
-    2.  Escribe la siguiente consulta y presiona Enter:
-    ```sql
-    SELECT log_time, json_extract(log_body, '$.user_id') AS user FROM generic_log WHERE json_extract(log_body, '$.status') >= 500;
-    ```
-* **Análisis y Estrategia:** Usamos el poder de SQL para consultar directamente nuestros logs como si fueran una base de datos, extrayendo (`json_extract`) solo los campos que nos interesan de las entradas que cumplen nuestra condición (`status >= 500`).
-* **Resultado Esperado:** Una tabla perfectamente formateada con la hora y el ID de usuario de cada petición fallida.
+| Tecla | Acción |
+|-------|--------|
+| `q`   | Salir de lnav |
+| `↑ ↓` | Desplazarse entre líneas |
+| `e`   | Saltar al siguiente error |
+| `w`   | Saltar al siguiente warning |
+| `;`   | Abrir el prompt SQL |
+| `g`   | Ir a una hora específica |
 
 ---
 
-#### 🕵️ Para el Analista de Seguridad / NetOps
+## 🔍 Segmentación por Rol Técnico
 
-**Receta: Detección de Ataques de Fuerza Bruta en SSH**
-* **Objetivo:** Identificar las direcciones IP con la mayor cantidad de intentos de login fallidos en las últimas 24 horas.
-* **El Comando:**
-    ```bash
-    # El archivo auth.log debería existir en la mayoría de los sistemas Ubuntu
-    sudo lnav /var/log/auth.log
-    ```
-* **La Acción dentro de `lnav` (SQL Query):**
-    Presiona `;` y ejecuta:
-    ```sql
-    SELECT COUNT(*) AS attempts, client_host FROM sshd_log WHERE log_time > '24 hours ago' AND log_message LIKE 'Failed password for%' GROUP BY client_host ORDER BY attempts DESC LIMIT 10;
-    ```
-* **Análisis y Estrategia:** `lnav` entiende el formato de `auth.log` y lo parsea. Con SQL, filtramos los mensajes de `Failed password` de las últimas 24 horas (`log_time > '24 hours ago'`), los agrupamos por IP (`GROUP BY client_host`) y obtenemos un "Top 10" de los atacantes.
-* **Resultado Esperado:** Una tabla con dos columnas: `attempts` y `client_host`, mostrándote las 10 IPs más persistentes que puedes usar para bloquear en tu firewall.
+### 🖥️ SysOps — Correlación de eventos del sistema
 
-**Receta 2: Análisis de Tráfico Web (si tienes un servidor web)**
-> **Requisito:** Esta receta asume que tienes un servidor web como Nginx o Apache instalado.
+```bash
+sudo lnav /var/log
+```
 
-* **Objetivo:** Encontrar qué IPs están generando la mayor cantidad de errores en tu servidor web.
-* **Comando:** `sudo lnav /var/log/nginx/access.log`
-* **Acción SQL:** `;` y luego `SELECT c_ip, COUNT(*) AS errors FROM access_log WHERE sc_status >= 400 GROUP BY c_ip ORDER BY errors DESC LIMIT 10;`
-* **Utilidad:** Te da un reporte claro del "Top 10" de IPs que están causando problemas, ideal para alimentar herramientas como `fail2ban`.
+1. Presiona `g`, escribe `22:30`, Enter.
+2. Usa `e` y `w` para navegar entre errores y advertencias.
+
+📈 Resultado: Línea de tiempo completa del sistema para investigar incidentes.
+
+---
+
+### 🔧 DevOps — Análisis estructurado de logs JSON
+
+```bash
+echo '{"timestamp":"2025-08-21T10:00:00","level":"ERROR","status":500,"user_id":"user-123"}' > /tmp/test.json.log
+echo '{"timestamp":"2025-08-21T10:01:00","level":"INFO","status":200,"user_id":"user-456"}' >> /tmp/test.json.log
+lnav /tmp/test.json.log
+```
+
+Dentro de `lnav`, presiona `;` y ejecuta:
+
+```sql
+SELECT log_time, json_extract(log_body, '$.user_id') AS user
+FROM generic_log
+WHERE json_extract(log_body, '$.status') >= 500;
+```
+
+📊 Resultado: Tabla con hora e ID de usuario de cada error HTTP 5xx.
+
+---
+
+### 🛡️ SecOps — Detección de fuerza bruta en SSH
+
+```bash
+sudo lnav /var/log/auth.log
+```
+
+Dentro de `lnav`, presiona `;` y ejecuta:
+
+```sql
+SELECT COUNT(*) AS attempts, client_host
+FROM sshd_log
+WHERE log_time > '24 hours ago'
+  AND log_message LIKE 'Failed password for%'
+GROUP BY client_host
+ORDER BY attempts DESC
+LIMIT 10;
+```
+
+📊 Resultado: Top 10 IPs con más intentos fallidos.
+
+---
+
+### 🌐 NetOps — Análisis de tráfico web (Nginx)
+
+```bash
+sudo lnav /var/log/nginx/access.log
+```
+
+Dentro de `lnav`, presiona `;` y ejecuta:
+
+```sql
+SELECT c_ip, COUNT(*) AS errors
+FROM access_log
+WHERE sc_status >= 400
+GROUP BY c_ip
+ORDER BY errors DESC
+LIMIT 10;
+```
+
+📊 Resultado: IPs que generan más errores HTTP. Útil para `fail2ban`.
+
+---
+
+## 🧪 Recomendaciones de Prueba
+
+- Usa logs reales en `/var/log` o crea archivos de prueba.
+- Resaltado automático: errores en rojo, warnings en amarillo.
+- Histograma (`Ctrl-H`) para visualizar picos de actividad.
+
+---
+
+## 🧩 Comparación con Herramientas Tradicionales
+
+| Herramienta     | Limitación                  | Ventaja de `lnav`                    |
+|------------------|-----------------------------|--------------------------------------|
+| `cat` / `less`   | No estructuran              | `lnav` parsea y ordena               |
+| `grep` / `awk`   | No correlacionan            | `lnav` permite SQL                   |
+| `tail -f`        | Vista fragmentada           | `lnav` unifica múltiples fuentes     |
+
+---
+
+## ✅ Ventajas Clave
+
+- 🔍 Unificación automática de múltiples logs
+- 🧠 Reconocimiento de formatos comunes (syslog, JSON, Apache, etc.)
+- 🧩 Consultas SQL sobre logs en tiempo real
+- 📊 Vistas cronológicas e interactivas
+- 🧵 Compatible con TTY, SSH y entornos minimalistas
+
+---
+
+## 📚 Recursos Adicionales
+
+- [Repositorio oficial del comando lnav](https://github.com/jgaragorry/linux-cmd-new-generation/tree/main/commands/14-lnav)
+- [Sitio oficial del proyecto lnav](https://lnav.org)
+- [Documentación extendida y ejemplos](https://github.com/tstack/lnav)
+
+---
+
+> 🧠 Este README está diseñado para onboarding técnico, defensibilidad en auditorías y enseñanza por rol. Puedes clonarlo como plantilla para tu biblioteca de documentación reproducible.
