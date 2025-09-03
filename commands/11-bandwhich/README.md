@@ -1,13 +1,15 @@
-# 📡 11-bandwhich: Monitor de Ancho de Banda por Proceso y Conexión
+# 📡 bandwhich — Monitor de Red por Proceso, Conexión y Dirección Remota
 
-`11-bandwhich` es una herramienta CLI avanzada para monitorear el uso de red en tiempo real por proceso, conexión y dirección remota.  
-Ideal para entornos Linux donde se requiere visibilidad granular del tráfico, especialmente en servidores Ubuntu 20.04/24.04 LTS.
+`bandwhich` es una herramienta CLI escrita en Rust que permite visualizar en tiempo real el uso de red por proceso, conexión y dirección remota.  
+Ideal para entornos Linux donde se requiere visibilidad granular del tráfico, especialmente en servidores Ubuntu Server 20.04 y 24.04 LTS.
 
 ---
 
-## ⚙️ Instalación en Ubuntu Server
+## ⚙️ Instalación paso a paso
 
-### 1. Instalar Rust y Cargo (requerido para compilar)
+### 1️⃣ Instalar Rust y Cargo
+
+Rust es necesario para compilar `bandwhich`. Cargo es su gestor de paquetes.
 
 ```bash
 sudo apt update
@@ -16,80 +18,150 @@ curl https://sh.rustup.rs -sSf | sh
 source $HOME/.cargo/env
 ```
 
-### 2. Clonar y compilar el repositorio
-
-```bash
-git clone https://github.com/ZeinNoureddin/Bandwhich-Network-Monitoring-Tool.git
-cd Bandwhich-Network-Monitoring-Tool
-cargo build --release
-```
-
-### 3. Dar permisos de captura a la herramienta
-
-```bash
-sudo setcap cap_net_raw,cap_net_admin=eip target/release/bandwhich
-```
+🔍 *Este paso instala Rust y configura el entorno para compilar herramientas como `bandwhich`.*
 
 ---
 
-## 🚀 Uso básico
+### 2️⃣ Clonar el repositorio oficial
 
 ```bash
-sudo ./target/release/bandwhich
+git clone https://github.com/imsnif/bandwhich.git
+cd bandwhich
 ```
 
-Esto inicia el monitoreo en tiempo real de la interfaz de red predeterminada.
+🔍 *Usamos el repositorio oficial porque contiene el archivo `Cargo.toml` necesario para compilar.*
+
+---
+
+### 3️⃣ Compilar el binario en modo release
+
+```bash
+cargo build --release
+```
+
+🔍 *Esto genera el ejecutable optimizado en `./target/release/bandwhich`.*
+
+---
+
+### 4️⃣ Otorgar permisos de captura sin sudo
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/bandwhich
+```
+
+🔍 *Permite que `bandwhich` acceda a sockets de red sin requerir `sudo` en cada ejecución.*
+
+---
+
+## 🚀 Ejecución básica
+
+```bash
+./target/release/bandwhich
+```
+
+🔍 *Esto inicia el monitoreo en tiempo real sobre la interfaz de red predeterminada.*
 
 ---
 
 ## 🧩 Opciones disponibles
 
-| Opción                  | ¿Qué hace?                                                                 | ¿Por qué usarla?                                                                 |
-|-------------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| `--interface <iface>`   | Especifica la interfaz de red a monitorear (ej. `eth0`, `ens160`)           | Útil en servidores con múltiples interfaces o VLANs                             |
-| `--raw`                 | Muestra salida sin formato, ideal para procesamiento por scripts            | Integración con herramientas de monitoreo personalizado                         |
-| `--no-resolve`          | Evita resolución DNS de IPs remotas                                         | Mejora rendimiento y evita fugas de privacidad                                  |
-| `--filter <regex>`      | Filtra procesos por nombre usando expresiones regulares                     | Focaliza el análisis en servicios críticos o sospechosos                        |
-| `--help`                | Muestra ayuda integrada                                                     | Referencia rápida para operadores                                               |
+| Opción                  | Descripción técnica                                                       | Uso recomendado por rol técnico                                               |
+|-------------------------|---------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| `--interface <iface>`   | Monitorea una interfaz específica (ej. `eth0`, `ens160`)                  | NetOps, SRE: para auditar tráfico por VLAN o túnel                            |
+| `--no-resolve`          | Evita resolución DNS de IPs remotas                                       | SecOps, SRE: para evitar fugas de privacidad y mejorar rendimiento            |
+| `--raw`                 | Muestra salida sin formato interactivo                                    | SysOps, DevOps: para exportar a logs o procesar con scripts                   |
+| `--filter <regex>`      | Filtra procesos por nombre usando expresiones regulares                   | SecOps, DevOps: para focalizar en servicios críticos o sospechosos            |
+| `--help`                | Muestra ayuda integrada                                                   | Todos los roles: referencia rápida                                            |
 
 ---
 
-## 🧠 Segmentación por Rol Técnico
+## 🖥️ Interfaz de salida en tiempo real
 
-### 🛠️ DevOps
+Al ejecutar `bandwhich`, se despliega una pantalla dividida en tres paneles clave:
 
-- Integrar `bandwhich` en pipelines para validar consumo de red por servicio.
-- Detectar procesos que generan tráfico inesperado tras despliegues.
+### 1️⃣ Process Name
 
-### 🔐 SecOps
+📌 **Qué muestra:**  
+Lista de procesos locales que están generando o recibiendo tráfico de red.
 
-- Identificar procesos que comunican con IPs externas sin autorización.
-- Usar `--no-resolve` para evitar que el monitoreo revele nombres DNS.
+🔍 **Campos típicos:**
+- Nombre del proceso (`nginx`, `sshd`, `curl`)
+- PID (identificador del proceso)
+- Bytes enviados y recibidos
 
-### 🌐 NetOps
-
-- Auditar interfaces específicas con `--interface` para detectar congestión.
-- Filtrar por procesos con `--filter` para correlacionar con logs de red.
-
-### 🖥️ SysOps
-
-- Monitorear en tiempo real el uso de red por daemon o servicio.
-- Automatizar reportes con `--raw` y herramientas como `awk`, `jq`, `cron`.
-
-### ⚙️ SRE
-
-- Validar que servicios en producción no excedan límites de ancho de banda.
-- Detectar regresiones de tráfico tras cambios en infraestructura.
+🧠 **Interpretación por rol:**
+- **DevOps:** Detecta procesos que generan tráfico inesperado tras despliegues.
+- **SecOps:** Identifica procesos sospechosos que comunican con IPs externas.
+- **SysOps:** Audita servicios activos y su consumo de red.
 
 ---
 
-## 📈 Ejemplo de uso avanzado
+### 2️⃣ Remote Address
+
+📌 **Qué muestra:**  
+Direcciones IP remotas con las que los procesos locales están comunicando.
+
+🔍 **Campos típicos:**
+- IP remota (IPv4/IPv6)
+- Puerto remoto
+- Bytes enviados/recibidos
+
+🧠 **Interpretación por rol:**
+- **NetOps:** Correlaciona tráfico con logs de firewall y NAT.
+- **SecOps:** Detecta conexiones a dominios no autorizados o sospechosos.
+- **SRE:** Valida que servicios se comuniquen solo con endpoints esperados.
+
+---
+
+### 3️⃣ Utilization by Connection
+
+📌 **Qué muestra:**  
+Resumen de cada conexión activa, combinando proceso + IP remota + puerto.
+
+🔍 **Campos típicos:**
+- Proceso ↔ IP remota:puerto
+- Bytes enviados/recibidos
+- Protocolo (TCP/UDP)
+
+🧠 **Interpretación por rol:**
+- **DevOps:** Verifica que microservicios se comuniquen correctamente.
+- **SysOps:** Detecta conexiones persistentes que podrían indicar fugas de recursos.
+- **SRE:** Monitorea patrones de tráfico para detectar regresiones o picos.
+
+---
+
+## 🧪 Ejemplo de uso avanzado
 
 ```bash
-sudo ./target/release/bandwhich --interface eth0 --no-resolve --filter nginx
+./target/release/bandwhich --interface eth0 --no-resolve --filter nginx
 ```
 
-🔍 Esto monitorea solo la interfaz `eth0`, sin resolver DNS, y muestra tráfico generado por procesos que contienen "nginx".
+🔍 *Monitorea solo la interfaz `eth0`, sin resolver DNS, y muestra tráfico generado por procesos que contienen "nginx".*
+
+---
+
+## 📊 ¿Se pueden obtener más paneles?
+
+Actualmente, `bandwhich` muestra tres paneles fijos.  
+Para obtener más granularidad o exportar datos:
+
+- Usa `--raw` para salida sin formato.
+- Redirige a archivo: `bandwhich --raw > log.txt`
+- Procesa con herramientas como `awk`, `grep`, `jq` o `Python`.
+
+🔍 *Esto permite crear dashboards personalizados o integraciones con Prometheus/Grafana.*
+
+---
+
+## 🧠 Segmentación por rol técnico
+
+| Rol     | Aplicaciones clave |
+|---------|---------------------|
+| **DevOps**  | Validar tráfico por proceso tras despliegues. Detectar servicios mal configurados. |
+| **SecOps**  | Auditar conexiones sospechosas. Detectar procesos que comunican con IPs externas. |
+| **NetOps**  | Monitorear interfaces específicas. Correlacionar tráfico con logs de red. |
+| **SysOps**  | Automatizar auditorías de red. Detectar procesos que consumen ancho de banda excesivo. |
+| **SRE**     | Validar patrones de tráfico. Detectar regresiones o picos tras cambios en infraestructura. |
 
 ---
 
@@ -108,5 +180,5 @@ Consulta el archivo `LICENSE.md` para más detalles.
 ---
 
 <p align="center">
-  <strong>🔎 Visibilidad total del tráfico. Precisión por proceso. Control por interfaz. Ideal para equipos técnicos que no se conforman con lo superficial.</strong>
+  <strong>🔎 Visibilidad en tiempo real. Precisión por proceso. Control por conexión. Ideal para entornos Linux críticos.</strong>
 </p>
