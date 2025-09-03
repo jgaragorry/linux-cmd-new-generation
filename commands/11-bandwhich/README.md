@@ -1,126 +1,112 @@
-# 🛡️ Linux Privilege Escalation Toolkit - README
+# 📡 11-bandwhich: Monitor de Ancho de Banda por Proceso y Conexión
 
-<p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/TuxFlat.svg" alt="Linux Security" width="100"/>
-</p>
-
-Este repositorio contiene un conjunto de scripts y herramientas para simular, detectar y mitigar técnicas comunes de escalada de privilegios en sistemas Linux.  
-Está diseñado para ser instalado en entornos **Ubuntu Server 24.04 LTS** y **20.04 LTS**, y puede ser utilizado por equipos de:
-
-- 🛠️ DevOps: para validar configuraciones seguras antes del despliegue.
-- 🔐 SecOps: para realizar auditorías de seguridad y pruebas de hardening.
-- 🌐 NetOps: para verificar accesos y privilegios en servicios expuestos.
-- 🖥️ SysOps: para mantener la integridad del sistema operativo.
-- ⚙️ SRE: para automatizar validaciones de seguridad en pipelines CI/CD.
+`11-bandwhich` es una herramienta CLI avanzada para monitorear el uso de red en tiempo real por proceso, conexión y dirección remota.  
+Ideal para entornos Linux donde se requiere visibilidad granular del tráfico, especialmente en servidores Ubuntu 20.04/24.04 LTS.
 
 ---
 
-## 📦 Instalación
+## ⚙️ Instalación en Ubuntu Server
 
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/tuusuario/linux-escalada-privilegios.git
-cd linux-escalada-privilegios
-```
-
-### 2. Dar permisos de ejecución
-
-```bash
-chmod +x */*.sh
-```
-
-### 3. Instalar dependencias (si aplica)
+### 1. Instalar Rust y Cargo (requerido para compilar)
 
 ```bash
 sudo apt update
-sudo apt install -y curl net-tools lsof
+sudo apt install -y curl build-essential
+curl https://sh.rustup.rs -sSf | sh
+source $HOME/.cargo/env
+```
+
+### 2. Clonar y compilar el repositorio
+
+```bash
+git clone https://github.com/ZeinNoureddin/Bandwhich-Network-Monitoring-Tool.git
+cd Bandwhich-Network-Monitoring-Tool
+cargo build --release
+```
+
+### 3. Dar permisos de captura a la herramienta
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip target/release/bandwhich
 ```
 
 ---
 
-## 🚀 Uso por Rol Técnico
+## 🚀 Uso básico
+
+```bash
+sudo ./target/release/bandwhich
+```
+
+Esto inicia el monitoreo en tiempo real de la interfaz de red predeterminada.
+
+---
+
+## 🧩 Opciones disponibles
+
+| Opción                  | ¿Qué hace?                                                                 | ¿Por qué usarla?                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| `--interface <iface>`   | Especifica la interfaz de red a monitorear (ej. `eth0`, `ens160`)           | Útil en servidores con múltiples interfaces o VLANs                             |
+| `--raw`                 | Muestra salida sin formato, ideal para procesamiento por scripts            | Integración con herramientas de monitoreo personalizado                         |
+| `--no-resolve`          | Evita resolución DNS de IPs remotas                                         | Mejora rendimiento y evita fugas de privacidad                                  |
+| `--filter <regex>`      | Filtra procesos por nombre usando expresiones regulares                     | Focaliza el análisis en servicios críticos o sospechosos                        |
+| `--help`                | Muestra ayuda integrada                                                     | Referencia rápida para operadores                                               |
+
+---
+
+## 🧠 Segmentación por Rol Técnico
 
 ### 🛠️ DevOps
 
-- Validar que los binarios SUID no estén mal configurados (`lab1_suid_path`)
-- Verificar tareas cron inseguras (`lab2_insecure_cron`)
-- Integrar scripts de verificación en pipelines
+- Integrar `bandwhich` en pipelines para validar consumo de red por servicio.
+- Detectar procesos que generan tráfico inesperado tras despliegues.
 
 ### 🔐 SecOps
 
-- Simular ataques de escalada para evaluar defensas
-- Usar `verify_exploit.sh` para comprobar si un sistema es vulnerable
-- Aplicar `revert_fix.sh` como parte de políticas de remediación
+- Identificar procesos que comunican con IPs externas sin autorización.
+- Usar `--no-resolve` para evitar que el monitoreo revele nombres DNS.
 
 ### 🌐 NetOps
 
-- Revisar servicios que ejecutan con privilegios innecesarios
-- Detectar configuraciones de red que permiten acceso a recursos root
+- Auditar interfaces específicas con `--interface` para detectar congestión.
+- Filtrar por procesos con `--filter` para correlacionar con logs de red.
 
 ### 🖥️ SysOps
 
-- Automatizar auditorías de permisos y tareas programadas
-- Usar `setup_lab.sh` para crear entornos de prueba controlados
+- Monitorear en tiempo real el uso de red por daemon o servicio.
+- Automatizar reportes con `--raw` y herramientas como `awk`, `jq`, `cron`.
 
 ### ⚙️ SRE
 
-- Integrar pruebas de seguridad en entornos de staging
-- Validar que los cambios no introduzcan vectores de escalada
+- Validar que servicios en producción no excedan límites de ancho de banda.
+- Detectar regresiones de tráfico tras cambios en infraestructura.
 
 ---
 
-## 🔍 Explicación de Scripts
-
-Cada laboratorio contiene 4 scripts clave:
-
-| Script               | ¿Qué hace?                                                                 | ¿Por qué usarlo?                                                                 |
-|----------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| `00_setup_lab.sh`    | Crea el entorno vulnerable (SUID o cron inseguro)                          | Simula condiciones reales para pruebas de seguridad                             |
-| `01_exploit.sh`      | Ejecuta la técnica de escalada de privilegios                              | Permite validar si el sistema es explotable                                     |
-| `02_verify_exploit.sh` | Comprueba si se obtuvo acceso root o privilegios elevados                 | Confirma el éxito del ataque y permite documentar el resultado                  |
-| `03_revert_fix.sh`   | Elimina el entorno vulnerable y aplica mitigaciones                        | Restaura el sistema y enseña buenas prácticas de hardening                      |
-
----
-
-## 🧪 Ejemplo de Ejecución
+## 📈 Ejemplo de uso avanzado
 
 ```bash
-cd lab1_suid_path
-bash 00_setup_lab.sh       # Crea el binario vulnerable
-bash 01_exploit.sh         # Ejecuta el exploit
-bash 02_verify_exploit.sh  # Verifica si se obtuvo root
-bash 03_revert_fix.sh      # Limpia y mitiga
+sudo ./target/release/bandwhich --interface eth0 --no-resolve --filter nginx
 ```
 
----
-
-## 📘 Recomendaciones por Rol
-
-| Rol     | Recomendación clave |
-|---------|---------------------|
-| DevOps  | Integrar `verify_exploit.sh` en pruebas de integración |
-| SecOps  | Ejecutar `exploit.sh` en entornos aislados para evaluar riesgos |
-| NetOps  | Auditar tareas cron y binarios SUID en servidores expuestos |
-| SysOps  | Usar `revert_fix.sh` como parte de procedimientos de mantenimiento |
-| SRE     | Automatizar `setup_lab.sh` y `verify_exploit.sh` en pipelines CI/CD |
+🔍 Esto monitorea solo la interfaz `eth0`, sin resolver DNS, y muestra tráfico generado por procesos que contienen "nginx".
 
 ---
 
 ## 📜 Licencia
 
 Este proyecto está bajo la licencia MIT.  
-Consulta el archivo `LICENSE` para más detalles.
+Consulta el archivo `LICENSE.md` para más detalles.
 
 ---
 
 ## 🤝 Contribuciones
 
-¿Tienes ideas para nuevos laboratorios o mejoras?  
-¡Abre un issue o envía un pull request!
+¿Quieres extender el soporte a más protocolos o agregar exportación a JSON?  
+¡Tus PRs son bienvenidos!
 
 ---
 
 <p align="center">
-  <strong>💡 Seguridad real para entornos reales. Simula, explota, verifica y fortalece tu infraestructura Linux.</strong>
+  <strong>🔎 Visibilidad total del tráfico. Precisión por proceso. Control por interfaz. Ideal para equipos técnicos que no se conforman con lo superficial.</strong>
 </p>
