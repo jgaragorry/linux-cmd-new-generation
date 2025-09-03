@@ -96,32 +96,106 @@ LIMIT 10;
 
 ---
 
-### 🌐 NetOps — Análisis de tráfico web (Nginx)
+### 🌐 NetOps — Análisis de tráfico web (simulado)
 
 ```bash
-sudo lnav /var/log/nginx/access.log
+cat <<EOF > /tmp/fake-access.log
+127.0.0.1 - - [03/Sep/2025:18:00:00 +0000] "GET /index.html HTTP/1.1" 200 1024
+192.168.1.10 - - [03/Sep/2025:18:01:00 +0000] "POST /login HTTP/1.1" 403 512
+10.0.0.5 - - [03/Sep/2025:18:02:00 +0000] "GET /admin HTTP/1.1" 500 256
+EOF
+
+lnav /tmp/fake-access.log
 ```
 
 Dentro de `lnav`, presiona `;` y ejecuta:
 
 ```sql
-SELECT c_ip, COUNT(*) AS errors
+SELECT c_ip, COUNT(*) AS errores
 FROM access_log
 WHERE sc_status >= 400
 GROUP BY c_ip
-ORDER BY errors DESC
-LIMIT 10;
+ORDER BY errores DESC;
 ```
 
-📊 Resultado: IPs que generan más errores HTTP. Útil para `fail2ban`.
+📊 Resultado: IPs que generan errores HTTP. Útil para detección temprana sin necesidad de Nginx.
 
 ---
 
-## 🧪 Recomendaciones de Prueba
+## 🧪 Ejemplos Reproducibles Validados
 
-- Usa logs reales en `/var/log` o crea archivos de prueba.
-- Resaltado automático: errores en rojo, warnings en amarillo.
-- Histograma (`Ctrl-H`) para visualizar picos de actividad.
+Esta sección incluye ejemplos funcionales probados en sistemas reales, sin dependencias externas adicionales. Cada uno está diseñado para onboarding rápido, demostraciones en vivo y validación de funcionalidades clave de `lnav`.
+
+---
+
+### ✅ Ejemplo 1: Visualizar logs del sistema en tiempo real
+
+```bash
+sudo lnav /var/log/syslog
+```
+
+🔧 **Uso**: Monitorear eventos del sistema conforme ocurren.
+
+🎯 **Resultado**:
+- Vista cronológica interactiva.
+- Navegación por hora (`g`), búsqueda (`/`), y salto a errores (`e`).
+- Resaltado automático de errores y advertencias.
+
+🧠 Ideal para SysOps y DevOps durante incidentes o auditorías.
+
+---
+
+### ✅ Ejemplo 3 (Alternativo): Simular log de acceso web y detectar errores HTTP
+
+```bash
+cat <<EOF > /tmp/fake-access.log
+127.0.0.1 - - [03/Sep/2025:18:00:00 +0000] "GET /index.html HTTP/1.1" 200 1024
+192.168.1.10 - - [03/Sep/2025:18:01:00 +0000] "POST /login HTTP/1.1" 403 512
+10.0.0.5 - - [03/Sep/2025:18:02:00 +0000] "GET /admin HTTP/1.1" 500 256
+EOF
+
+lnav /tmp/fake-access.log
+```
+
+🔧 **Uso**: Simular tráfico web y detectar errores sin instalar Nginx.
+
+🎯 **Resultado**:
+- `lnav` detecta el formato tipo Apache.
+- Ejecuta SQL para identificar IPs con errores:
+
+```sql
+SELECT c_ip, COUNT(*) AS errores
+FROM access_log
+WHERE sc_status >= 400
+GROUP BY c_ip
+ORDER BY errores DESC;
+```
+
+🧠 Útil para NetOps y DevOps en entornos sin servidor web.
+
+---
+
+### ✅ Ejemplo 4: Detectar fuerza bruta en intentos SSH
+
+```bash
+sudo lnav /var/log/auth.log
+```
+
+🔧 **Uso**: Identificar IPs con múltiples intentos fallidos de login.
+
+🎯 **Resultado**:
+- Navegación por eventos de autenticación.
+- Consulta SQL para detectar patrones de ataque:
+
+```sql
+SELECT client_host, COUNT(*) AS intentos
+FROM sshd_log
+WHERE log_message LIKE 'Failed password%'
+GROUP BY client_host
+ORDER BY intentos DESC;
+```
+
+🧠 Clave para SecOps en detección temprana de amenazas.
 
 ---
 
