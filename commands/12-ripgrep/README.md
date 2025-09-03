@@ -1,10 +1,10 @@
-# 🔍 ripgrep — Búsqueda ultrarrápida en terminal para archivos y código
+# 🔍 ripgrep (`rg`) — Búsqueda ultrarrápida en terminal para archivos y logs
 
-`ripgrep` (`rg`) es una herramienta moderna de búsqueda en texto plano que combina la velocidad de `grep` con la inteligencia de `ack` y la simplicidad de `ag` (Silver Searcher). Está diseñada para entornos técnicos donde se requiere velocidad, precisión y compatibilidad con expresiones regulares.
+`ripgrep` es una herramienta de búsqueda en texto plano que combina la velocidad de `grep` con la inteligencia de `ack` y la simplicidad de `ag`. Ideal para entornos Linux recién instalados, servidores sin entorno gráfico, y flujos DevOps/SecOps/SRE.
 
 ---
 
-## 📦 Instalación en Ubuntu Server 20.04 / 24.04 LTS (TTY)
+## 📦 Instalación en Ubuntu Server 20.04 / 22.04 / 24.04 LTS
 
 ```bash
 # Actualizar repositorios
@@ -14,7 +14,7 @@ sudo apt update
 sudo apt install ripgrep
 ```
 
-> ✅ No requiere entorno gráfico. Funciona perfectamente en TTY, SSH y terminales minimalistas.
+> ✅ Compatible con TTY, SSH, WSL, y entornos minimalistas sin GUI.
 
 ---
 
@@ -22,47 +22,65 @@ sudo apt install ripgrep
 
 - Busca texto en archivos y carpetas usando expresiones regulares.
 - Ignora automáticamente archivos listados en `.gitignore`, `.ignore`, etc.
-- Es extremadamente rápido gracias a su motor basado en Rust (`regex` + `grep` + `walkdir`).
+- Es extremadamente rápido gracias a su motor en Rust.
 - Compatible con UTF-8, binarios, y múltiples formatos.
 
 ---
 
-## 🔄 ¿A quién reemplaza?
+## 🧑‍💻 Segmentación por rol técnico (con rutas reales en sistemas recién instalados)
 
-| Herramienta       | ¿Qué hacía?                  | ¿Qué mejora `ripgrep`?                                      |
-|-------------------|------------------------------|--------------------------------------------------------------|
-| `grep`            | Búsqueda básica en texto     | Mucho más rápido, ignora archivos ocultos, mejor UX         |
-| `ack`             | Búsqueda en código fuente    | Más rápido, menos dependencias                              |
-| `ag` (Silver Searcher) | Búsqueda rápida en proyectos | Mejor soporte de expresiones regulares y binarios           |
-| `find + grep`     | Búsqueda recursiva           | `rg` lo hace en un solo paso, más eficiente                 |
+### 🖥️ SysOps — Auditoría de logs del sistema
 
----
+```bash
+# Buscar errores en el log principal del sistema
+rg "error" /var/log/syslog
 
-## 🧑‍💻 Segmentación por rol técnico
+# Buscar fallos de autenticación
+rg "Failed password" /var/log/auth.log
 
-### 🖥️ SysOps
-- Auditoría de logs del sistema
-- Búsqueda de errores en `/var/log`
-- Validación de configuraciones en `/etc`
+# Buscar eventos de montaje de disco
+rg "EXT4-fs" /var/log/kern.log
+```
 
-### 🌐 NetOps
-- Búsqueda de IPs, MACs o patrones en archivos de configuración de red
-- Validación de reglas en `iptables`, `nftables`, `dnsmasq`, etc.
+### 🌐 NetOps — Validación de configuración de red
 
-### 🛡️ SecOps
-- Detección de patrones sospechosos en logs
-- Búsqueda de indicadores de compromiso (IOCs)
-- Validación de firmas en archivos de reglas (Snort, Suricata)
+```bash
+# Buscar configuración de interfaces
+rg "iface" /etc/network/interfaces
 
-### 🔧 DevOps
-- Búsqueda de variables en `.env`, YAML, JSON
-- Validación de pipelines, CI/CD, Terraform, Ansible
-- Refactorización de configuraciones en múltiples repositorios
+# Buscar reglas en resolv.conf
+rg "nameserver" /etc/resolv.conf
+```
 
-### 🚀 SRE
-- Detección de errores en logs de producción
-- Validación de trazas en sistemas distribuidos
-- Búsqueda de métricas o eventos en archivos de monitoreo
+### 🛡️ SecOps — Detección de accesos sospechosos
+
+```bash
+# Buscar intentos de acceso por SSH
+rg "Accepted password" /var/log/auth.log
+
+# Buscar comandos ejecutados por sudo
+rg "COMMAND=" /var/log/syslog
+```
+
+### 🔧 DevOps — Validación de servicios y procesos
+
+```bash
+# Buscar fallos en servicios systemd
+rg "failed" /var/log/syslog
+
+# Buscar errores en journald (si está habilitado)
+journalctl | rg "error"
+```
+
+### 🚀 SRE — Diagnóstico de rendimiento y errores
+
+```bash
+# Buscar timeouts en logs del sistema
+rg "timeout" /var/log/syslog
+
+# Buscar eventos de remount por errores
+rg "errors=remount-ro" /var/log/kern.log
+```
 
 ---
 
@@ -74,9 +92,6 @@ rg error
 
 # Buscar IPs en archivos de configuración
 rg -e '\b\d{1,3}(\.\d{1,3}){3}\b' /etc/
-
-# Buscar "timeout" en archivos .log ignorando binarios
-rg timeout --type log
 
 # Buscar en archivos ocultos y sin respetar .gitignore
 rg --no-ignore --hidden "token"
@@ -93,44 +108,32 @@ rg --no-ignore --hidden "token"
 | `-n`                | Muestra número de línea                               |
 | `--color always`    | Fuerza color en salida                                |
 | `--files`           | Lista todos los archivos que serían buscados          |
-| `--type <tipo>`     | Filtra por tipo de archivo (`html`, `log`, `py`, etc.)|
-| `--ignore-case`     | Ignora mayúsculas/minúsculas                          |
+| `-g '*.log'`        | Filtra por extensión de archivo                       |
 | `--hidden`          | Incluye archivos ocultos                              |
 | `--no-ignore`       | Ignora `.gitignore` y similares                       |
 
 ---
 
-## 🧪 Ejemplos prácticos por perfil
-
-### 🖥️ SysOps — Buscar errores en logs del sistema
+## 🧪 Ejemplos reproducibles en sistemas recién instalados
 
 ```bash
+# Buscar errores en logs del sistema
 rg "error" /var/log/syslog
+
+# Buscar eventos de autenticación fallida
+rg "authentication failure" /var/log/auth.log
+
+# Buscar configuraciones de red
+rg "dhcp" /etc/netplan/*.yaml
+
+# Buscar eventos del kernel relacionados con disco
+rg "EXT4-fs" /var/log/kern.log
+
+# Buscar comandos ejecutados con sudo
+rg "COMMAND=" /var/log/syslog
 ```
 
-### 🌐 NetOps — Validar reglas de firewall
-
-```bash
-rg "DROP" /etc/iptables/rules.v4
-```
-
-### 🛡️ SecOps — Detectar accesos sospechosos
-
-```bash
-rg "Accepted password" /var/log/auth.log
-```
-
-### 🔧 DevOps — Verificar uso de variables en YAML
-
-```bash
-rg "DB_PASSWORD" ./config/*.yml
-```
-
-### 🚀 SRE — Buscar trazas de timeout en producción
-
-```bash
-rg "timeout" /var/log/app/*.log
-```
+> 🧠 Todos estos ejemplos funcionan en Ubuntu Server recién instalado, sin necesidad de configurar rutas adicionales ni instalar software extra.
 
 ---
 
