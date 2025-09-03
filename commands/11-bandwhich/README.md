@@ -43,20 +43,39 @@ cargo build --release
 
 ---
 
-### 4️⃣ Otorgar permisos de captura sin sudo
+## 🔐 Seguridad y ejecución
+
+Por defecto, `bandwhich` requiere privilegios elevados para acceder a sockets de red:
+
+```bash
+sudo ./target/release/bandwhich
+```
+
+🔍 *Esto garantiza que solo usuarios autorizados puedan monitorear el tráfico.*
+
+### ⚠️ ¿Y si no quiero usar sudo?
+
+Existe una alternativa técnica, pero **no recomendada por defecto**:
 
 ```bash
 sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/bandwhich
 ```
 
-🔍 *Permite que `bandwhich` acceda a sockets de red sin requerir `sudo` en cada ejecución.*
+📌 Esto otorga al binario capacidades permanentes para capturar tráfico sin `sudo`.
+
+🛡️ **Advertencia de seguridad:**
+- Si el binario es modificado maliciosamente, podría usarse para espiar o manipular tráfico.
+- En entornos multiusuario, esto representa una superficie de riesgo.
+- Se recomienda solo en entornos controlados, con verificación de integridad (`sha256sum`) y permisos restringidos (`chmod 750`).
+
+✅ *La decisión queda a criterio del usuario, pero este README documenta claramente los riesgos.*
 
 ---
 
 ## 🚀 Ejecución básica
 
 ```bash
-./target/release/bandwhich
+sudo ./target/release/bandwhich
 ```
 
 🔍 *Esto inicia el monitoreo en tiempo real sobre la interfaz de red predeterminada.*
@@ -130,16 +149,6 @@ Resumen de cada conexión activa, combinando proceso + IP remota + puerto.
 
 ---
 
-## 🧪 Ejemplo de uso avanzado
-
-```bash
-./target/release/bandwhich --interface eth0 --no-resolve --filter nginx
-```
-
-🔍 *Monitorea solo la interfaz `eth0`, sin resolver DNS, y muestra tráfico generado por procesos que contienen "nginx".*
-
----
-
 ## 📊 ¿Se pueden obtener más paneles?
 
 Actualmente, `bandwhich` muestra tres paneles fijos.  
@@ -180,5 +189,5 @@ Consulta el archivo `LICENSE.md` para más detalles.
 ---
 
 <p align="center">
-  <strong>🔎 Visibilidad en tiempo real. Precisión por proceso. Control por conexión. Ideal para entornos Linux críticos.</strong>
+  <strong>🔎 Visibilidad en tiempo real. Precisión por proceso. Control por conexión. Documentado con enfoque técnico y seguro para entornos Linux críticos.</strong>
 </p>
