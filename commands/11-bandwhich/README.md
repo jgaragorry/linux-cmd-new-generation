@@ -1,83 +1,126 @@
-# comando `bandwhich`
+# 🛡️ Linux Privilege Escalation Toolkit - README
 
-## 🚀 La Alternativa Moderna a `nethogs`
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/TuxFlat.svg" alt="Linux Security" width="100"/>
+</p>
 
-`bandwhich` es una utilidad de terminal que muestra el uso de ancho de banda en tiempo real por proceso, conexión y dirección IP remota. Te dice "quién está usando la red AHORA MISMO".
+Este repositorio contiene un conjunto de scripts y herramientas para simular, detectar y mitigar técnicas comunes de escalada de privilegios en sistemas Linux.  
+Está diseñado para ser instalado en entornos **Ubuntu Server 24.04 LTS** y **20.04 LTS**, y puede ser utilizado por equipos de:
 
-### ¿Qué es y por qué es mejor?
+- 🛠️ DevOps: para validar configuraciones seguras antes del despliegue.
+- 🔐 SecOps: para realizar auditorías de seguridad y pruebas de hardening.
+- 🌐 NetOps: para verificar accesos y privilegios en servicios expuestos.
+- 🖥️ SysOps: para mantener la integridad del sistema operativo.
+- ⚙️ SRE: para automatizar validaciones de seguridad en pipelines CI/CD.
 
--   **Vista Consolidada:** Presenta la información de forma mucho más clara y compacta que `nethogs`.
--   **Resolución de DNS:** Intenta resolver las direcciones IP remotas a nombres de dominio, haciendo más fácil identificar a dónde se están conectando tus procesos.
--   **Interfaz Clara:** La UI es fácil de entender de un vistazo, mostrando el proceso, la conexión local, la remota y la velocidad de subida/bajada.
--   **Rápido y Ligero:** Escrito en Rust, es eficiente y consume pocos recursos.
+---
 
-### Instalación en Ubuntu 24.04 LTS
+## 📦 Instalación
 
-`bandwhich` no está en los repositorios de Ubuntu. Se instala con `cargo`. También requiere `libpcap-dev` para capturar paquetes.
+### 1. Clonar el repositorio
 
 ```bash
-# 1. Instalar dependencias
+git clone https://github.com/tuusuario/linux-escalada-privilegios.git
+cd linux-escalada-privilegios
+```
+
+### 2. Dar permisos de ejecución
+
+```bash
+chmod +x */*.sh
+```
+
+### 3. Instalar dependencias (si aplica)
+
+```bash
 sudo apt update
-sudo apt install -y libpcap-dev
-
-# 2. Asegúrate de tener Rust/Cargo instalado
-source "$HOME/.cargo/env"
-
-# 3. Instala bandwhich
-cargo install bandwhich
+sudo apt install -y curl net-tools lsof
 ```
 
-### Sintaxis Básica
+---
 
-```
-sudo bandwhich [OPCIONES]
-```
-**Importante:** `bandwhich` necesita privilegios de `root` para capturar el tráfico de red.
+## 🚀 Uso por Rol Técnico
 
-### ¿Quién puede ejecutarlo?
+### 🛠️ DevOps
 
-Solo el usuario `root` o usuarios con las capacidades de red adecuadas (`sudo`).
+- Validar que los binarios SUID no estén mal configurados (`lab1_suid_path`)
+- Verificar tareas cron inseguras (`lab2_insecure_cron`)
+- Integrar scripts de verificación en pipelines
 
-### Argumentos y Opciones Clave
+### 🔐 SecOps
 
-| Opción           | Descripción                                                                 |
-| ---------------- | --------------------------------------------------------------------------- |
-| `-i`, `--interface` | Especifica la interfaz de red a monitorear (ej: `-i eth0`).               |
-| `-n`, `--no-resolve` | No intenta resolver las direcciones IP a nombres de dominio.              |
-| `-r`, `--raw`    | Muestra la salida en un formato más simple, sin la UI, para scripting.      |
+- Simular ataques de escalada para evaluar defensas
+- Usar `verify_exploit.sh` para comprobar si un sistema es vulnerable
+- Aplicar `revert_fix.sh` como parte de políticas de remediación
 
-### Configuración de Alias Permanente (Bash)
+### 🌐 NetOps
 
-No se recomienda un alias, ya que su uso es específico y requiere `sudo`.
+- Revisar servicios que ejecutan con privilegios innecesarios
+- Detectar configuraciones de red que permiten acceso a recursos root
 
-### 🎓 Ejercicios Prácticos
+### 🖥️ SysOps
 
-#### Ejercicio 1: Identificar al Culpable de una Red Lenta
+- Automatizar auditorías de permisos y tareas programadas
+- Usar `setup_lab.sh` para crear entornos de prueba controlados
 
-**Tarea:** La conexión a internet del servidor se ha vuelto repentinamente muy lenta. Necesitas identificar qué proceso está consumiendo todo el ancho de banda.
+### ⚙️ SRE
 
-**Comando:**
+- Integrar pruebas de seguridad en entornos de staging
+- Validar que los cambios no introduzcan vectores de escalada
+
+---
+
+## 🔍 Explicación de Scripts
+
+Cada laboratorio contiene 4 scripts clave:
+
+| Script               | ¿Qué hace?                                                                 | ¿Por qué usarlo?                                                                 |
+|----------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| `00_setup_lab.sh`    | Crea el entorno vulnerable (SUID o cron inseguro)                          | Simula condiciones reales para pruebas de seguridad                             |
+| `01_exploit.sh`      | Ejecuta la técnica de escalada de privilegios                              | Permite validar si el sistema es explotable                                     |
+| `02_verify_exploit.sh` | Comprueba si se obtuvo acceso root o privilegios elevados                 | Confirma el éxito del ataque y permite documentar el resultado                  |
+| `03_revert_fix.sh`   | Elimina el entorno vulnerable y aplica mitigaciones                        | Restaura el sistema y enseña buenas prácticas de hardening                      |
+
+---
+
+## 🧪 Ejemplo de Ejecución
+
 ```bash
-sudo bandwhich
+cd lab1_suid_path
+bash 00_setup_lab.sh       # Crea el binario vulnerable
+bash 01_exploit.sh         # Ejecuta el exploit
+bash 02_verify_exploit.sh  # Verifica si se obtuvo root
+bash 03_revert_fix.sh      # Limpia y mitiga
 ```
-**Utilidad:** Al ejecutar el comando, verás una lista en tiempo real de los procesos que están usando la red, ordenados por el uso de ancho de banda. En segundos, podrás identificar si es un proceso de `apt`, una sincronización de `docker pull`, un `rsync` inesperado o algo peor.
 
-#### Ejercicio 2: Verificar Conexiones Salientes de un Servicio
+---
 
-**Tarea:** Has desplegado una nueva aplicación y quieres verificar que solo se está conectando a los servicios externos que esperas (ej: una base de datos en AWS, una API de terceros).
+## 📘 Recomendaciones por Rol
 
-**Comando:**
-```bash
-sudo bandwhich
-```
-**Utilidad:** Observa la columna "Remote Address". Verás los nombres de dominio y las IPs a las que se están conectando tus procesos. Esto te permite auditar las conexiones de red de tus aplicaciones y detectar cualquier comunicación inesperada o sospechosa.
+| Rol     | Recomendación clave |
+|---------|---------------------|
+| DevOps  | Integrar `verify_exploit.sh` en pruebas de integración |
+| SecOps  | Ejecutar `exploit.sh` en entornos aislados para evaluar riesgos |
+| NetOps  | Auditar tareas cron y binarios SUID en servidores expuestos |
+| SysOps  | Usar `revert_fix.sh` como parte de procedimientos de mantenimiento |
+| SRE     | Automatizar `setup_lab.sh` y `verify_exploit.sh` en pipelines CI/CD |
 
-#### Ejercicio 3: Monitorizar el Tráfico en una Interfaz de Red Específica
+---
 
-**Tarea:** Tu servidor tiene múltiples interfaces de red (una pública, una para la red interna, una para Docker). Quieres monitorizar exclusivamente el tráfico que entra y sale por la interfaz pública (`eth0`).
+## 📜 Licencia
 
-**Comando:**
-```bash
-sudo bandwhich --interface eth0
-```
-**Utilidad:** Esto aísla el análisis a una única interfaz, eliminando el "ruido" del tráfico interno o de la red de contenedores. Es crucial para entender cómo tu servidor se está comunicando con el mundo exterior y para diagnosticar problemas de conectividad o de seguridad en el perímetro de tu red.
+Este proyecto está bajo la licencia MIT.  
+Consulta el archivo `LICENSE` para más detalles.
+
+---
+
+## 🤝 Contribuciones
+
+¿Tienes ideas para nuevos laboratorios o mejoras?  
+¡Abre un issue o envía un pull request!
+
+---
+
+<p align="center">
+  <strong>💡 Seguridad real para entornos reales. Simula, explota, verifica y fortalece tu infraestructura Linux.</strong>
+</p>
